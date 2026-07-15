@@ -96,11 +96,35 @@ body{
 .footer{margin-top:3rem;text-align:center;color:var(--text-dimmer);font-size:12px;}
 .footer a{color:var(--text-dim);text-decoration:none;}
 
+/* embedded tool viewer */
+.viewer{position:fixed;inset:0;z-index:50;background:var(--navy);display:none;flex-direction:column;}
+.viewer.open{display:flex;}
+.viewer-bar{
+  height:56px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 18px;
+  background:linear-gradient(90deg,var(--navy2),var(--navy3));
+  border-bottom:1px solid rgba(255,255,255,.08);
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+.back-btn{
+  display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:var(--text);
+  font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;
+  flex-shrink:0;
+}
+.back-btn:hover{background:rgba(76,175,80,.22);border-color:rgba(76,175,80,.4);}
+.viewer-icon{width:26px;height:26px;border-radius:7px;overflow:hidden;flex-shrink:0;}
+.viewer-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+.viewer-title{font-size:14px;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.viewer-newtab{color:var(--text-dim);font-size:12px;text-decoration:none;padding:6px 10px;border-radius:8px;flex-shrink:0;white-space:nowrap;}
+.viewer-newtab:hover{color:var(--text);background:rgba(255,255,255,.06);}
+.viewer-frame{flex:1;border:0;width:100%;background:#fff;}
+
 @media(max-width:600px){
   .wrap{padding:2rem 1.2rem 3rem;}
   .hdr{flex-direction:column;align-items:flex-start;}
   .greeting{font-size:26px;}
   .clock{text-align:left;}
+  .viewer-title{display:none;}
 }
 </style>
 </head>
@@ -133,6 +157,16 @@ body{
   <div class="footer">NAGeo Hub &middot; six tools, one front door &middot; <a href="#" id="editLinksNote">edit URLs in index.html</a></div>
 </div>
 
+<div class="viewer" id="viewer">
+  <div class="viewer-bar">
+    <button class="back-btn" id="backBtn" onclick="closeViewer()">← Back to Hub</button>
+    <div class="viewer-icon" id="viewerIcon"><img src="" alt=""></div>
+    <div class="viewer-title" id="viewerTitle"></div>
+    <a class="viewer-newtab" id="viewerNewTab" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+  </div>
+  <iframe class="viewer-frame" id="viewerFrame" src="" title="Tool viewer"></iframe>
+</div>
+
 <script>
 // ── Edit these to point at your real GitHub Pages URLs.
 // Icon files expected in an /icons folder next to this index.html — see filenames below.
@@ -148,8 +182,9 @@ var TOOLS = [
 function renderGrid(list) {
   var grid = document.getElementById('grid');
   if (!list.length) { grid.innerHTML = '<div style="color:var(--text-dimmer);padding:2rem 0;">No tools match.</div>'; return; }
-  grid.innerHTML = list.map(function(t) {
-    return '<a class="card" href="'+t.url+'" target="_blank" rel="noopener" onmousemove="cardGlow(event)">'
+  grid.innerHTML = list.map(function(t, i) {
+    var realIdx = TOOLS.indexOf(t);
+    return '<a class="card" href="'+t.url+'" data-idx="'+realIdx+'" onclick="return openTool(event,'+realIdx+')" onmousemove="cardGlow(event)">'
       + '<div class="card-icon"><img src="'+t.icon+'" alt="'+t.name+'" onerror="this.parentElement.innerHTML=\'📦\';this.parentElement.style.display=\'flex\';this.parentElement.style.alignItems=\'center\';this.parentElement.style.justifyContent=\'center\';this.parentElement.style.fontSize=\'24px\';this.parentElement.style.background=\'rgba(255,255,255,.06)\';"></div>'
       + '<div class="card-title">'+t.name+'</div>'
       + '<div class="card-desc">'+t.desc+'</div>'
@@ -167,6 +202,31 @@ document.getElementById('filterInput').addEventListener('input', function() {
   renderGrid(TOOLS.filter(function(t){ return (t.name+' '+t.desc+' '+t.tag).toLowerCase().includes(q); }));
 });
 renderGrid(TOOLS);
+
+// ── In-hub viewer: opens the tool in an embedded iframe with its own back button ──
+function openTool(e, idx) {
+  if (e) { if (e.metaKey || e.ctrlKey || e.shiftKey) return true; e.preventDefault(); } // let cmd/ctrl-click still open a real new tab
+  var t = TOOLS[idx];
+  if (!t || t.url === '#') return false;
+  document.getElementById('viewerIcon').querySelector('img').src = t.icon;
+  document.getElementById('viewerTitle').textContent = t.name;
+  document.getElementById('viewerNewTab').href = t.url;
+  document.getElementById('viewerFrame').src = t.url;
+  document.getElementById('viewer').classList.add('open');
+  history.pushState({ nageoViewer: true }, '', '#' + t.tag.toLowerCase());
+  return false;
+}
+function closeViewer() {
+  document.getElementById('viewer').classList.remove('open');
+  document.getElementById('viewerFrame').src = 'about:blank'; // stop background activity when leaving
+  if (location.hash) history.pushState({}, '', location.pathname);
+}
+window.addEventListener('popstate', function() {
+  if (!(history.state && history.state.nageoViewer)) closeViewer();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('viewer').classList.contains('open')) closeViewer();
+});
 
 function updateClock() {
   var now = new Date();
