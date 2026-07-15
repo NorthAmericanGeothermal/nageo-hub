@@ -153,6 +153,48 @@ body::before{
 .sched-state{font-size:12.5px;color:var(--text-dimmer);padding:1.5rem;text-align:center;}
 .sched-state a{color:var(--green-light);}
 
+.sched-view-toggle{display:flex;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:10px;padding:3px;gap:2px;}
+.sched-view-btn{border:none;background:transparent;color:var(--text-dimmer);font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.sched-view-btn.active{background:rgba(67,160,71,.18);color:var(--green-light);}
+.sched-view-btn:hover:not(.active){color:var(--text-dim);}
+
+/* overview grid — the original 7-day-at-a-glance view, toggled alongside the live carousel */
+.sched-strip{
+  display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 10px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;
+}
+.sched-strip::-webkit-scrollbar{height:6px;}
+.sched-strip::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:10px;}
+.sched-day{
+  scroll-snap-align:start;flex:0 0 240px;min-height:120px;
+  background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;
+  padding:14px;backdrop-filter:blur(14px);
+}
+.sched-day.is-today{border-color:rgba(143,227,150,.4);background:rgba(67,160,71,.07);box-shadow:0 0 0 1px rgba(67,160,71,.12);}
+.sched-day-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+.sched-day-name{font-size:12.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;}
+.sched-day.is-today .sched-day-name{color:var(--green-light);}
+.sched-day-date{font-size:11px;color:var(--text-dimmer);}
+.sched-day-count{font-size:10px;color:var(--text-dimmer);background:rgba(255,255,255,.06);padding:2px 7px;border-radius:10px;}
+.sched-job{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;
+  padding:9px 10px;margin-bottom:7px;cursor:pointer;transition:background .15s,border-color .15s;
+}
+.sched-job:last-child{margin-bottom:0;}
+.sched-job:hover{background:rgba(67,160,71,.1);border-color:rgba(67,160,71,.25);}
+.sched-job-time{font-size:11px;font-weight:700;color:var(--green-light);margin-bottom:3px;}
+.sched-job-cust{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:2px;line-height:1.3;}
+.sched-job-tech{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
+.sched-job-detail{
+  display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);
+  font-size:11.5px;color:var(--text-dim);line-height:1.5;
+}
+.sched-job.open .sched-job-detail{display:block;}
+.sched-empty{font-size:11.5px;color:var(--text-dimmer);text-align:center;padding:1.4rem 0;}
+@media(max-width:600px){
+  .sched-day{flex-basis:78vw;}
+}
+
 /* mini live carousel — same slide engine as TV Mode, scaled down and inline.
    Reuses the .tv-* slide classes (defined below) via the .mini-tv scope so
    both sizes render identical markup and never drift out of sync. */
@@ -325,8 +367,12 @@ body::before{
 
   <div class="sched">
     <div class="sched-hdr">
-      <div class="sched-title">Live Schedule</div>
+      <div class="sched-title">This Week's Schedule</div>
       <div class="sched-range" id="schedRange"></div>
+      <div class="sched-view-toggle" id="schedViewToggle">
+        <button class="sched-view-btn active" data-view="live" onclick="setSchedView('live')">Live</button>
+        <button class="sched-view-btn" data-view="overview" onclick="setSchedView('overview')">Overview</button>
+      </div>
       <button class="sched-today-btn" onclick="jumpToToday()">Today</button>
       <div class="sched-nav">
         <button onclick="shiftWeek(-1)" title="Previous week">←</button>
@@ -345,6 +391,7 @@ body::before{
         <button class="mini-ctrl-btn primary" id="miniPlayBtn" onclick="slideTogglePlay()" title="Pause / resume">⏸</button>
       </div>
     </div>
+    <div class="sched-strip" id="schedStrip" style="display:none"><div class="sched-state">Loading schedule…</div></div>
   </div>
 
   <div class="footer">NAGeo Hub &middot; six tools, one front door &middot; <a href="#" id="editLinksNote">edit URLs in index.html</a></div>
@@ -522,6 +569,9 @@ var tvIndex = 0;
 var tvPlaying = true;
 var tvAdvanceTimer = null;
 var tvClockTimer = null;
+var schedView = 'live'; // 'live' (carousel) or 'overview' (7-day-at-a-glance grid)
+var currentByDate = null;
+var currentWeekStart = null;
 
 async function loadWeekSlides() {
   var weekStart = startOfWeek(new Date());
@@ -530,13 +580,17 @@ async function loadWeekSlides() {
   document.getElementById('schedRange').textContent = fmtDateLabel(weekStart) + ' – ' + fmtDateLabel(weekEnd);
 
   setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">📡</div><div class="tv-empty-day-text">Loading schedule…</div></div>');
+  document.getElementById('schedStrip').innerHTML = '<div class="sched-state">Loading schedule…</div>';
   var byDate;
   try {
     byDate = await fetchScheduleWeek(weekStart);
   } catch (err) {
     setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">⚠️</div><div class="tv-empty-day-text">Couldn\'t load the schedule.<br>(' + err.message + ')</div></div>');
+    document.getElementById('schedStrip').innerHTML = '<div class="sched-state">Couldn\'t load the schedule.<br>(' + err.message + ')</div>';
     return;
   }
+  currentByDate = byDate;
+  currentWeekStart = weekStart;
 
   tvSlides = buildTVSlides(byDate, weekStart);
   tvIndex = 0;
@@ -547,6 +601,7 @@ async function loadWeekSlides() {
   renderProgressDots();
   renderCurrentSlide();
   if (tvPlaying) startTVAutoplay();
+  renderOverview(); // keep the overview grid fresh in the background too, however it's toggled
 }
 function shiftWeek(delta) { weekOffset += delta; loadWeekSlides(); }
 function jumpToToday() { weekOffset = 0; loadWeekSlides(); }
@@ -558,6 +613,58 @@ function setSlideContainers(html) {
   var tv = document.getElementById('tvSlideWrap');
   if (mini) mini.innerHTML = html;
   if (tv) tv.innerHTML = html;
+}
+
+// ── View toggle: "Live" carousel vs. "Overview" 7-day grid ──
+function setSchedView(v) {
+  schedView = v;
+  document.querySelectorAll('.sched-view-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.view === v); });
+  document.getElementById('miniTvWrap').style.display = v === 'live' ? '' : 'none';
+  document.getElementById('schedStrip').style.display = v === 'overview' ? '' : 'none';
+  if (v === 'overview') renderOverview();
+}
+
+function renderOverview() {
+  var strip = document.getElementById('schedStrip');
+  if (!strip || !currentWeekStart || !currentByDate) return;
+  var weekStart = currentWeekStart;
+  var byDate = currentByDate;
+  var today = new Date();
+  var html = '';
+  var todayIdx = -1;
+  for (var i=0;i<7;i++) {
+    var d = new Date(weekStart); d.setDate(d.getDate()+i);
+    var key = fmtISO(d);
+    var jobs = byDate[key] || [];
+    var today_ = isSameDay(d, today);
+    if (today_) todayIdx = i;
+    html += '<div class="sched-day' + (today_?' is-today':'') + '" id="schedDay'+i+'">';
+    html += '<div class="sched-day-hdr"><div><div class="sched-day-name">' + (today_?'Today':fmtDayLabel(d)) + '</div><div class="sched-day-date">' + fmtDateLabel(d) + '</div></div>';
+    html += '<div class="sched-day-count">' + jobs.length + '</div></div>';
+    if (!jobs.length) {
+      html += '<div class="sched-empty">No jobs scheduled</div>';
+    } else {
+      jobs.forEach(function(j) {
+        html += '<div class="sched-job" onclick="this.classList.toggle(\'open\')">';
+        html += '<div class="sched-job-time">' + (j.time||'') + '</div>';
+        html += '<div class="sched-job-cust">' + (j.customer||'') + '</div>';
+        html += '<div class="sched-job-tech">👤 ' + (j.tech||'Unassigned') + '</div>';
+        if (j.type || j.notes) {
+          html += '<div class="sched-job-detail">';
+          if (j.type) html += '<strong>' + j.type + '</strong><br>';
+          if (j.notes) html += j.notes;
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+  }
+  strip.innerHTML = html;
+  if (schedView === 'overview' && todayIdx !== -1) {
+    var el = document.getElementById('schedDay'+todayIdx);
+    if (el) el.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  }
 }
 
 function initials(name) {
