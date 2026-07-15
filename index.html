@@ -432,9 +432,9 @@ document.addEventListener('keydown', function(e) {
 // backend code to deploy — a browser can't safely call HCP directly since
 // that needs your API key).
 // ══════════════════════════════════════════════════════════
-var SCHEDULE_API_URL = ""; // ← paste your deployed edge function URL here, e.g. "https://xxxx.supabase.co/functions/v1/nageo-hub-schedule"
-var SCHEDULE_ANON_KEY = ""; // ← your Supabase project's anon/publishable key, sent as a Bearer token
-var DEMO_SCHEDULE = true;   // ← set to false once SCHEDULE_API_URL is live; shows sample data until then
+var SCHEDULE_API_URL = "https://hpgwwegjsxyxovdattoc.supabase.co/functions/v1/quick-responder";
+var SCHEDULE_ANON_KEY = "sb_publishable_D2PqYQoJjZ8koEM9NPvmeg_KB_Wa66H"; // sent as a Bearer token
+var DEMO_SCHEDULE = false;  // set back to true any time to preview with sample data instead
 
 var weekOffset = 0;
 var scheduleCache = {}; // keyed by "YYYY-MM-DD" -> array of jobs
