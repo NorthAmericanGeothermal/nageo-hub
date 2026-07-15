@@ -150,42 +150,46 @@ body::before{
   background:rgba(67,160,71,.12);color:var(--green-light);cursor:pointer;font-family:inherit;transition:all .15s;
 }
 .sched-tv-btn:hover{background:rgba(67,160,71,.22);border-color:rgba(67,160,71,.5);}
-.sched-strip{
-  display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 10px;
-  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;
-}
-.sched-strip::-webkit-scrollbar{height:6px;}
-.sched-strip::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:10px;}
-.sched-day{
-  scroll-snap-align:start;flex:0 0 240px;min-height:120px;
-  background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;
-  padding:14px;backdrop-filter:blur(14px);
-}
-.sched-day.is-today{border-color:rgba(143,227,150,.4);background:rgba(67,160,71,.07);box-shadow:0 0 0 1px rgba(67,160,71,.12);}
-.sched-day-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
-.sched-day-name{font-size:12.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;}
-.sched-day.is-today .sched-day-name{color:var(--green-light);}
-.sched-day-date{font-size:11px;color:var(--text-dimmer);}
-.sched-day-count{font-size:10px;color:var(--text-dimmer);background:rgba(255,255,255,.06);padding:2px 7px;border-radius:10px;}
-.sched-job{
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;
-  padding:9px 10px;margin-bottom:7px;cursor:pointer;transition:background .15s,border-color .15s;
-}
-.sched-job:last-child{margin-bottom:0;}
-.sched-job:hover{background:rgba(67,160,71,.1);border-color:rgba(67,160,71,.25);}
-.sched-job-time{font-size:11px;font-weight:700;color:var(--green-light);margin-bottom:3px;}
-.sched-job-cust{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:2px;line-height:1.3;}
-.sched-job-tech{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
-.sched-job-detail{
-  display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);
-  font-size:11.5px;color:var(--text-dim);line-height:1.5;
-}
-.sched-job.open .sched-job-detail{display:block;}
-.sched-empty{font-size:11.5px;color:var(--text-dimmer);text-align:center;padding:1.4rem 0;}
 .sched-state{font-size:12.5px;color:var(--text-dimmer);padding:1.5rem;text-align:center;}
 .sched-state a{color:var(--green-light);}
-@media(max-width:600px){
-  .sched-day{flex-basis:78vw;}
+
+/* mini live carousel — same slide engine as TV Mode, scaled down and inline.
+   Reuses the .tv-* slide classes (defined below) via the .mini-tv scope so
+   both sizes render identical markup and never drift out of sync. */
+.mini-tv{
+  background:var(--glass);border:1px solid var(--glass-border);border-radius:18px;
+  padding:16px 18px 14px;backdrop-filter:blur(16px);
+}
+.mini-slide-wrap{display:flex;flex-direction:column;height:270px;}
+.mini-controls{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;}
+.mini-ctrl-btn{
+  width:32px;height:32px;border-radius:9px;border:1px solid var(--glass-border);background:var(--glass);
+  color:var(--text-dim);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;font-family:inherit;
+}
+.mini-ctrl-btn:hover{background:rgba(67,160,71,.18);border-color:rgba(67,160,71,.4);color:var(--green-light);}
+.mini-ctrl-btn.primary{background:rgba(67,160,71,.16);border-color:rgba(67,160,71,.35);color:var(--green-light);}
+.mini-tv .tv-slide-hdr{margin-bottom:10px;}
+.mini-tv .tv-slide-day{font-size:10.5px;letter-spacing:1.3px;margin-bottom:4px;}
+.mini-tv .tv-slide-tech{font-size:19px;gap:10px;}
+.mini-tv .tv-slide-tech-avatar{width:32px;height:32px;font-size:12px;border-radius:9px;}
+.mini-tv .tv-slide-count{font-size:11.5px;margin-left:2px;}
+.mini-tv .tv-body{gap:14px;}
+.mini-tv .tv-job-card{padding:11px 13px;border-radius:12px;border-left-width:3px;}
+.mini-tv .tv-job-time{font-size:12.5px;margin-bottom:2px;}
+.mini-tv .tv-job-cust{font-size:13.5px;margin-bottom:2px;}
+.mini-tv .tv-job-addr{font-size:11px;margin-bottom:4px;}
+.mini-tv .tv-job-type{font-size:9px;padding:2px 7px;}
+.mini-tv .tv-job-notes{font-size:11px;margin-top:5px;}
+.mini-tv .tv-map{border-radius:13px;}
+.mini-tv .tv-empty-day-icon{font-size:32px;}
+.mini-tv .tv-empty-day-text{font-size:12.5px;}
+.mini-tv .tv-progress{padding:0 0 10px;position:static;}
+.mini-tv .tv-dot{height:3px;}
+@media(max-width:700px){
+  .mini-slide-wrap{height:auto;}
+  .mini-tv .tv-body{grid-template-columns:1fr;}
+  .mini-tv .tv-map{min-height:160px;}
 }
 
 /* ── TV MODE: full-screen auto-advancing wallboard ── */
@@ -321,7 +325,7 @@ body::before{
 
   <div class="sched">
     <div class="sched-hdr">
-      <div class="sched-title">This Week's Schedule</div>
+      <div class="sched-title">Live Schedule</div>
       <div class="sched-range" id="schedRange"></div>
       <button class="sched-today-btn" onclick="jumpToToday()">Today</button>
       <div class="sched-nav">
@@ -330,7 +334,17 @@ body::before{
       </div>
       <button class="sched-tv-btn" onclick="openTVMode()">📺 TV Mode</button>
     </div>
-    <div class="sched-strip" id="schedStrip"><div class="sched-state">Loading schedule…</div></div>
+    <div class="mini-tv" id="miniTvWrap">
+      <div class="tv-progress" id="miniProgress"></div>
+      <div class="mini-slide-wrap" id="miniSlideWrap"><div class="tv-empty-day"><div class="tv-empty-day-icon">📡</div><div class="tv-empty-day-text">Loading schedule…</div></div></div>
+      <div class="mini-controls">
+        <div class="tv-nav-arrows" id="miniArrows">
+          <button class="mini-ctrl-btn" onclick="slidePrev()" title="Previous">←</button>
+          <button class="mini-ctrl-btn" onclick="slideNext()" title="Next">→</button>
+        </div>
+        <button class="mini-ctrl-btn primary" id="miniPlayBtn" onclick="slideTogglePlay()" title="Pause / resume">⏸</button>
+      </div>
+    </div>
   </div>
 
   <div class="footer">NAGeo Hub &middot; six tools, one front door &middot; <a href="#" id="editLinksNote">edit URLs in index.html</a></div>
@@ -358,8 +372,8 @@ body::before{
   <div class="tv-slide-wrap" id="tvSlideWrap"></div>
   <div class="tv-controls">
     <div class="tv-nav-arrows" id="tvArrows">
-      <button class="tv-ctrl-btn" onclick="tvPrev()" title="Previous">←</button>
-      <button class="tv-ctrl-btn" onclick="tvNext()" title="Next">→</button>
+      <button class="tv-ctrl-btn" onclick="slidePrev()" title="Previous">←</button>
+      <button class="tv-ctrl-btn" onclick="slideNext()" title="Next">→</button>
     </div>
     <button class="tv-ctrl-btn primary" id="tvPlayBtn" onclick="tvTogglePlay()" title="Pause / resume">⏸</button>
   </div>
@@ -427,17 +441,20 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ══════════════════════════════════════════════════════════
-// SCHEDULE STRIP — pulls "who's going where" from a Supabase Edge Function
-// that proxies Housecall Pro (see nageo-hub-schedule/function.ts for the
-// backend code to deploy — a browser can't safely call HCP directly since
-// that needs your API key).
+// LIVE SCHEDULE — one shared slide engine, rendered at two sizes.
+// A compact carousel is embedded right on the hub page, and "TV Mode" is
+// the exact same live slide blown up full-screen for an office TV. They
+// share one index/timer, so pausing or paging one does it to both — it's
+// the same live view, just a different window size onto it.
+// Pulls "who's going where" from a Supabase Edge Function that proxies
+// Housecall Pro (see nageo-hub-schedule-function.ts for the backend code —
+// a browser can't safely call HCP directly since that needs your API key).
 // ══════════════════════════════════════════════════════════
 var SCHEDULE_API_URL = "https://hpgwwegjsxyxovdattoc.supabase.co/functions/v1/quick-responder";
 var SCHEDULE_ANON_KEY = "sb_publishable_D2PqYQoJjZ8koEM9NPvmeg_KB_Wa66H"; // sent as a Bearer token
 var DEMO_SCHEDULE = false;  // set back to true any time to preview with sample data instead
 
 var weekOffset = 0;
-var scheduleCache = {}; // keyed by "YYYY-MM-DD" -> array of jobs
 
 function startOfWeek(d) {
   var x = new Date(d);
@@ -493,68 +510,11 @@ async function fetchScheduleWeek(weekStartDate) {
   return grouped;
 }
 
-async function renderSchedule() {
-  var strip = document.getElementById('schedStrip');
-  var weekStart = startOfWeek(new Date());
-  weekStart.setDate(weekStart.getDate() + weekOffset*7);
-  var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
-  document.getElementById('schedRange').textContent = fmtDateLabel(weekStart) + ' – ' + fmtDateLabel(weekEnd);
-
-  strip.innerHTML = '<div class="sched-state">Loading schedule…</div>';
-  var byDate;
-  try {
-    byDate = await fetchScheduleWeek(weekStart);
-  } catch (err) {
-    strip.innerHTML = '<div class="sched-state">Couldn\'t load the schedule. Check SCHEDULE_API_URL in index.html.<br>(' + err.message + ')</div>';
-    return;
-  }
-
-  var today = new Date();
-  var html = '';
-  var todayIdx = -1;
-  for (var i=0;i<7;i++) {
-    var d = new Date(weekStart); d.setDate(d.getDate()+i);
-    var key = fmtISO(d);
-    var jobs = byDate[key] || [];
-    var today_ = isSameDay(d, today);
-    if (today_) todayIdx = i;
-    html += '<div class="sched-day' + (today_?' is-today':'') + '" id="schedDay'+i+'">';
-    html += '<div class="sched-day-hdr"><div><div class="sched-day-name">' + (today_?'Today':fmtDayLabel(d)) + '</div><div class="sched-day-date">' + fmtDateLabel(d) + '</div></div>';
-    html += '<div class="sched-day-count">' + jobs.length + '</div></div>';
-    if (!jobs.length) {
-      html += '<div class="sched-empty">No jobs scheduled</div>';
-    } else {
-      jobs.forEach(function(j) {
-        html += '<div class="sched-job" onclick="this.classList.toggle(\'open\')">';
-        html += '<div class="sched-job-time">' + (j.time||'') + '</div>';
-        html += '<div class="sched-job-cust">' + (j.customer||'') + '</div>';
-        html += '<div class="sched-job-tech">👤 ' + (j.tech||'Unassigned') + '</div>';
-        if (j.type || j.notes) {
-          html += '<div class="sched-job-detail">';
-          if (j.type) html += '<strong>' + j.type + '</strong><br>';
-          if (j.notes) html += j.notes;
-          html += '</div>';
-        }
-        html += '</div>';
-      });
-    }
-    html += '</div>';
-  }
-  strip.innerHTML = html;
-  if (todayIdx !== -1) {
-    var el = document.getElementById('schedDay'+todayIdx);
-    if (el) el.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
-  }
-}
-function shiftWeek(delta) { weekOffset += delta; renderSchedule(); }
-function jumpToToday() { weekOffset = 0; renderSchedule(); }
-renderSchedule();
-setInterval(function(){ if (weekOffset === 0) renderSchedule(); }, 5*60*1000); // refresh current week every 5 min
-
 // ══════════════════════════════════════════════════════════
-// TV MODE — full-screen wallboard: one tech's day at a time, auto-advancing,
-// with a keyless Google Maps route between that tech's stops. Meant to run
-// on an office TV that people glance at while walking by.
+// SHARED SLIDE ENGINE — one tech's day at a time, auto-advancing, with a
+// keyless Google Maps route between that tech's stops. Rendered into
+// whichever container(s) exist right now: the inline mini carousel,
+// the full-screen TV Mode overlay, or both at once.
 // ══════════════════════════════════════════════════════════
 var TV_SLIDE_MS = 9000; // how long each slide stays up before auto-advancing
 var tvSlides = [];
@@ -562,7 +522,43 @@ var tvIndex = 0;
 var tvPlaying = true;
 var tvAdvanceTimer = null;
 var tvClockTimer = null;
-var tvDotStart = 0;
+
+async function loadWeekSlides() {
+  var weekStart = startOfWeek(new Date());
+  weekStart.setDate(weekStart.getDate() + weekOffset*7);
+  var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+  document.getElementById('schedRange').textContent = fmtDateLabel(weekStart) + ' – ' + fmtDateLabel(weekEnd);
+
+  setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">📡</div><div class="tv-empty-day-text">Loading schedule…</div></div>');
+  var byDate;
+  try {
+    byDate = await fetchScheduleWeek(weekStart);
+  } catch (err) {
+    setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">⚠️</div><div class="tv-empty-day-text">Couldn\'t load the schedule.<br>(' + err.message + ')</div></div>');
+    return;
+  }
+
+  tvSlides = buildTVSlides(byDate, weekStart);
+  tvIndex = 0;
+  if (weekOffset === 0) {
+    var idx = tvSlides.findIndex(function(s){ return s.isToday; });
+    if (idx !== -1) tvIndex = idx;
+  }
+  renderProgressDots();
+  renderCurrentSlide();
+  if (tvPlaying) startTVAutoplay();
+}
+function shiftWeek(delta) { weekOffset += delta; loadWeekSlides(); }
+function jumpToToday() { weekOffset = 0; loadWeekSlides(); }
+loadWeekSlides();
+setInterval(function(){ if (weekOffset === 0) loadWeekSlides(); }, 5*60*1000); // refresh current week every 5 min
+
+function setSlideContainers(html) {
+  var mini = document.getElementById('miniSlideWrap');
+  var tv = document.getElementById('tvSlideWrap');
+  if (mini) mini.innerHTML = html;
+  if (tv) tv.innerHTML = html;
+}
 
 function initials(name) {
   return (name||'').split(' ').map(function(w){ return w[0]||''; }).join('').toUpperCase().slice(0,2) || '?';
@@ -602,65 +598,52 @@ function buildTVSlides(byDate, weekStart) {
   return slides;
 }
 
-async function openTVMode() {
+function openTVMode() {
   document.getElementById('tv').classList.add('open');
-  document.getElementById('tvSlideWrap').innerHTML = '<div class="tv-empty-day"><div class="tv-empty-day-icon">📡</div><div class="tv-empty-day-text">Loading schedule…</div></div>';
-  try {
-    var thisWeekStart = startOfWeek(new Date());
-    var byDate = await fetchScheduleWeek(thisWeekStart);
-    tvSlides = buildTVSlides(byDate, thisWeekStart);
-  } catch (err) {
-    document.getElementById('tvSlideWrap').innerHTML = '<div class="tv-empty-day"><div class="tv-empty-day-icon">⚠️</div><div class="tv-empty-day-text">Couldn\'t load the schedule.</div></div>';
-    return;
-  }
-  tvIndex = 0;
-  tvPlaying = true;
-  renderTVProgress();
-  renderTVSlide();
-  startTVAutoplay();
+  renderCurrentSlide(); // TV Mode just displays whatever slide the mini carousel is already on
   if (!tvClockTimer) { updateTVClock(); tvClockTimer = setInterval(updateTVClock, 15000); }
   try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(function(){}); } catch(e){}
 }
 function closeTVMode() {
   document.getElementById('tv').classList.remove('open');
-  stopTVAutoplay();
   if (tvClockTimer) { clearInterval(tvClockTimer); tvClockTimer = null; }
   if (document.fullscreenElement) { try { document.exitFullscreen(); } catch(e){} }
+  // autoplay keeps running in the background — the mini carousel stays live
 }
 function updateTVClock() {
   var el = document.getElementById('tvClock');
   if (el) el.textContent = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
 }
 
-function renderTVProgress() {
-  var el = document.getElementById('tvProgress');
-  el.innerHTML = tvSlides.map(function(_, i) {
-    return '<div class="tv-dot" id="tvDot'+i+'"><div class="tv-dot-fill"></div></div>';
+function dotsHtml(prefix) {
+  return tvSlides.map(function(_, i) {
+    return '<div class="tv-dot" id="'+prefix+'Dot'+i+'"><div class="tv-dot-fill"></div></div>';
   }).join('');
 }
-function updateTVProgressState() {
-  tvSlides.forEach(function(_, i) {
-    var dot = document.getElementById('tvDot'+i);
-    if (!dot) return;
-    dot.classList.remove('done','active');
-    dot.style.removeProperty('--pct');
-    var fill = dot.querySelector('.tv-dot-fill');
-    fill.style.transition = 'none';
-    if (i < tvIndex) { dot.classList.add('done'); }
-    else if (i === tvIndex) { dot.classList.add('active'); fill.style.width = '0%'; }
-    else { fill.style.width = '0%'; }
+function renderProgressDots() {
+  var mini = document.getElementById('miniProgress'); if (mini) mini.innerHTML = dotsHtml('mini');
+  var tv = document.getElementById('tvProgress'); if (tv) tv.innerHTML = dotsHtml('tv');
+}
+function updateProgressState() {
+  ['mini','tv'].forEach(function(prefix) {
+    tvSlides.forEach(function(_, i) {
+      var dot = document.getElementById(prefix+'Dot'+i);
+      if (!dot) return;
+      dot.classList.remove('done','active');
+      var fill = dot.querySelector('.tv-dot-fill');
+      fill.style.transition = 'none';
+      if (i < tvIndex) { dot.classList.add('done'); fill.style.width = '100%'; }
+      else if (i === tvIndex) { dot.classList.add('active'); fill.style.width = '0%'; }
+      else { fill.style.width = '0%'; }
+    });
   });
 }
 
-function renderTVSlide() {
-  var wrap = document.getElementById('tvSlideWrap');
-  if (!tvSlides.length) { wrap.innerHTML = '<div class="tv-empty-day"><div class="tv-empty-day-icon">🗓️</div><div class="tv-empty-day-text">No jobs scheduled this week.</div></div>'; return; }
-  var s = tvSlides[tvIndex];
+function slideContentHtml(s) {
   var html = '<div class="tv-slide-hdr"><div class="tv-slide-day">' + s.dayLabel + ' · ' + s.dateLabel + '</div>';
   if (s.empty) {
     html += '</div><div class="tv-empty-day"><div class="tv-empty-day-icon">☕</div><div class="tv-empty-day-text">No jobs scheduled ' + s.dayLabel.toLowerCase() + '.</div></div>';
-    wrap.innerHTML = html;
-    return;
+    return html;
   }
   html += '<div class="tv-slide-tech"><div class="tv-slide-tech-avatar">' + initials(s.tech) + '</div>' + s.tech + '<span class="tv-slide-count">' + s.jobs.length + ' stop' + (s.jobs.length!==1?'s':'') + ' today</span></div></div>';
   html += '<div class="tv-body"><div class="tv-jobs">';
@@ -679,34 +662,43 @@ function renderTVSlide() {
     ? '<iframe src="'+mapUrl+'" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>'
     : '<div class="tv-map-empty">No addresses to map</div>';
   html += '</div></div>';
-  wrap.innerHTML = html;
-  updateTVProgressState();
+  return html;
+}
+
+function renderCurrentSlide() {
+  if (!tvSlides.length) { setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">🗓️</div><div class="tv-empty-day-text">No jobs scheduled this week.</div></div>'); return; }
+  setSlideContainers(slideContentHtml(tvSlides[tvIndex]));
+  updateProgressState();
   requestAnimationFrame(function() {
-    var fill = document.querySelector('#tvDot'+tvIndex+' .tv-dot-fill');
-    if (fill && tvPlaying) { fill.style.transition = 'width ' + TV_SLIDE_MS + 'ms linear'; fill.style.width = '100%'; }
+    ['mini','tv'].forEach(function(prefix) {
+      var fill = document.querySelector('#'+prefix+'Dot'+tvIndex+' .tv-dot-fill');
+      if (fill && tvPlaying) { fill.style.transition = 'width ' + TV_SLIDE_MS + 'ms linear'; fill.style.width = '100%'; }
+    });
   });
 }
 
-function tvNext() { tvIndex = (tvIndex + 1) % tvSlides.length; renderTVSlide(); if (tvPlaying) restartTVAutoplay(); }
-function tvPrev() { tvIndex = (tvIndex - 1 + tvSlides.length) % tvSlides.length; renderTVSlide(); if (tvPlaying) restartTVAutoplay(); }
+function slideNext() { tvIndex = (tvIndex + 1) % tvSlides.length; renderCurrentSlide(); if (tvPlaying) startTVAutoplay(); }
+function slidePrev() { tvIndex = (tvIndex - 1 + tvSlides.length) % tvSlides.length; renderCurrentSlide(); if (tvPlaying) startTVAutoplay(); }
 function startTVAutoplay() {
   stopTVAutoplay();
-  tvAdvanceTimer = setInterval(function() { tvIndex = (tvIndex+1) % tvSlides.length; renderTVSlide(); }, TV_SLIDE_MS);
+  tvAdvanceTimer = setInterval(function() { tvIndex = (tvIndex+1) % tvSlides.length; renderCurrentSlide(); }, TV_SLIDE_MS);
 }
-function restartTVAutoplay() { startTVAutoplay(); }
 function stopTVAutoplay() { if (tvAdvanceTimer) { clearInterval(tvAdvanceTimer); tvAdvanceTimer = null; } }
-function tvTogglePlay() {
+function slideTogglePlay() {
   tvPlaying = !tvPlaying;
-  document.getElementById('tvPlayBtn').textContent = tvPlaying ? '⏸' : '▶';
-  document.getElementById('tvArrows').classList.toggle('show', !tvPlaying);
-  if (tvPlaying) { startTVAutoplay(); renderTVSlide(); } else { stopTVAutoplay(); updateTVProgressState(); }
+  var icon = tvPlaying ? '⏸' : '▶';
+  var miniBtn = document.getElementById('miniPlayBtn'); if (miniBtn) miniBtn.textContent = icon;
+  var tvBtn = document.getElementById('tvPlayBtn'); if (tvBtn) tvBtn.textContent = icon;
+  var miniArrows = document.getElementById('miniArrows'); if (miniArrows) miniArrows.classList.toggle('show', !tvPlaying);
+  var tvArrows = document.getElementById('tvArrows'); if (tvArrows) tvArrows.classList.toggle('show', !tvPlaying);
+  if (tvPlaying) { startTVAutoplay(); renderCurrentSlide(); } else { stopTVAutoplay(); updateProgressState(); }
 }
 document.addEventListener('keydown', function(e) {
   if (!document.getElementById('tv').classList.contains('open')) return;
   if (e.key === 'Escape') closeTVMode();
-  else if (e.key === ' ') { e.preventDefault(); tvTogglePlay(); }
-  else if (e.key === 'ArrowRight' && !tvPlaying) tvNext();
-  else if (e.key === 'ArrowLeft' && !tvPlaying) tvPrev();
+  else if (e.key === ' ') { e.preventDefault(); slideTogglePlay(); }
+  else if (e.key === 'ArrowRight' && !tvPlaying) slideNext();
+  else if (e.key === 'ArrowLeft' && !tvPlaying) slidePrev();
 });
 
 function updateClock() {
