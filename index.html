@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NAGeo — Hub</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzFhM2E2YiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIxMyIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5OQTwvdGV4dD4KICA8dGV4dCB4PSIxNiIgeT0iMjMiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLHNlcmlmIiBmb250LXNpemU9IjgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjYzAzOTJiIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5HRU88L3RleHQ+CiAgPGxpbmUgeDE9IjQiIHkxPSIyNiIgeDI9IjI4IiB5Mj0iMjYiIHN0cm9rZT0iI2MwMzkyYiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPC9zdmc+">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0a1628;--navy2:#0f2341;--navy3:#1a3a6b;
+  --green:#4caf50;--green-light:#7ed67f;
+  --blue:#2e73d4;--blue-light:#6aadff;
+  --text:#f4f7fc;--text-dim:rgba(244,247,252,.6);--text-dimmer:rgba(244,247,252,.38);
+  --glass:rgba(255,255,255,.055);--glass-border:rgba(255,255,255,.09);--glass-hover:rgba(255,255,255,.09);
+  --radius:20px;
+}
+html,body{height:100%;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 15% -10%, rgba(46,115,212,.25), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(106,173,255,.12), transparent 40%),
+    linear-gradient(160deg,var(--navy) 0%,var(--navy2) 55%,var(--navy3) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+/* subtle ambient noise/orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;opacity:.35;}
+.orb1{width:420px;height:420px;background:#4caf50;top:-140px;right:-120px;opacity:.2;}
+.orb2{width:360px;height:360px;background:#2e73d4;bottom:-160px;left:-100px;opacity:.15;}
+
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:3.2rem 2rem 4rem;}
+
+/* header */
+.hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:2.6rem;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-badge{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--navy2),var(--navy3));border:1px solid rgba(76,175,80,.4);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-weight:800;font-size:14px;box-shadow:0 8px 24px rgba(76,175,80,.2);flex-shrink:0;}
+.brand-badge span{color:var(--green-light);}
+.brand-name{font-size:15px;font-weight:600;color:var(--text-dim);letter-spacing:.4px;text-transform:uppercase;}
+.greeting{font-size:34px;font-weight:700;letter-spacing:-.5px;margin-top:2px;}
+.greeting span{background:linear-gradient(90deg,#fff,var(--green-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.clock{text-align:right;color:var(--text-dim);font-size:13px;}
+.clock .time{font-size:22px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
+
+/* search */
+.search-row{margin-bottom:2.2rem;position:relative;max-width:420px;}
+.search-row input{
+  width:100%;padding:13px 18px 13px 42px;border-radius:14px;
+  border:1px solid var(--glass-border);background:var(--glass);
+  color:var(--text);font-size:14px;font-family:inherit;backdrop-filter:blur(12px);
+  transition:all .15s;
+}
+.search-row input::placeholder{color:var(--text-dimmer);}
+.search-row input:focus{outline:none;border-color:var(--green);background:rgba(76,175,80,.08);}
+.search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);opacity:.5;font-size:14px;pointer-events:none;}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.card{
+  position:relative;overflow:hidden;
+  background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);
+  padding:22px 22px 20px;backdrop-filter:blur(16px);
+  text-decoration:none;color:inherit;display:block;
+  transition:transform .22s cubic-bezier(.2,.8,.2,1), background .22s, border-color .22s, box-shadow .22s;
+  cursor:pointer;
+}
+.card:hover{
+  transform:translateY(-4px);
+  background:var(--glass-hover);
+  border-color:rgba(255,255,255,.18);
+  box-shadow:0 20px 50px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04);
+}
+.card::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;
+  background:radial-gradient(400px circle at var(--mx,50%) var(--my,0%), rgba(255,255,255,.08), transparent 60%);
+  pointer-events:none;
+}
+.card:hover::before{opacity:1;}
+.card-icon{
+  width:54px;height:54px;border-radius:14px;overflow:hidden;
+  margin-bottom:16px;box-shadow:0 8px 20px rgba(0,0,0,.35);
+}
+.card-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+.card-title{font-size:16px;font-weight:700;margin-bottom:5px;letter-spacing:-.2px;}
+.card-desc{font-size:13px;color:var(--text-dim);line-height:1.5;margin-bottom:16px;min-height:38px;}
+.card-foot{display:flex;align-items:center;justify-content:space-between;}
+.card-tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 9px;border-radius:20px;background:rgba(76,175,80,.14);color:var(--green-light);}
+.card-arrow{font-size:16px;color:var(--text-dimmer);transition:transform .2s, color .2s;}
+.card:hover .card-arrow{transform:translateX(3px);color:var(--text);}
+
+/* footer */
+.footer{margin-top:3rem;text-align:center;color:var(--text-dimmer);font-size:12px;}
+.footer a{color:var(--text-dim);text-decoration:none;}
+
+@media(max-width:600px){
+  .wrap{padding:2rem 1.2rem 3rem;}
+  .hdr{flex-direction:column;align-items:flex-start;}
+  .greeting{font-size:26px;}
+  .clock{text-align:left;}
+}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="wrap">
+  <div class="hdr">
+    <div>
+      <div class="brand">
+        <div class="brand-badge">NA<span>G</span></div>
+        <div class="brand-name">North American Geothermal</div>
+      </div>
+      <div class="greeting" id="greeting">Good day, <span>team</span>.</div>
+    </div>
+    <div class="clock">
+      <div id="clockDate">—</div>
+      <div class="time" id="clockTime">--:--</div>
+    </div>
+  </div>
+
+  <div class="search-row">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="filterInput" placeholder="Search tools…" autocomplete="off">
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="footer">NAGeo Hub &middot; six tools, one front door &middot; <a href="#" id="editLinksNote">edit URLs in index.html</a></div>
+</div>
+
+<script>
+// ── Edit these to point at your real GitHub Pages URLs.
+// Icon files expected in an /icons folder next to this index.html — see filenames below.
+var TOOLS = [
+  { name:"NAGeo Files",          desc:"Customer document storage & file management", icon:"icons/icon-files.png",      tag:"Files",     url:"https://northamericangeothermal.github.io/nageo-files/" },
+  { name:"Install Tracker",      desc:"Geothermal install milestone tracking",        icon:"icons/icon-install.png",    tag:"Install",   url:"https://northamericangeothermal.github.io/nageo-tracker/" },
+  { name:"Prospect ID Log",      desc:"Prospect & service lead intake log",           icon:"icons/icon-idlog.png",      tag:"Sales",     url:"https://northamericangeothermal.github.io/prospect-id-log/" },
+  { name:"NAGeo Leases",         desc:"CSG lease document & compliance tracking",     icon:"icons/icon-leases.png",     tag:"Leases",    url:"https://northamericangeothermal.github.io/lease-tracker/" },
+  { name:"Invoices & Cashflow",  desc:"Invoices, payables & cash flow",               icon:"icons/icon-cashflow.png",   tag:"Finance",   url:"https://northamericangeothermal.github.io/Invoices/" },
+  { name:"Team Texting",         desc:"Internal team SMS & broadcast messaging",      icon:"icons/icon-texting.png",    tag:"Team",      url:"https://northamericangeothermal.github.io/Nageo-call-alerts/" }
+];
+
+function renderGrid(list) {
+  var grid = document.getElementById('grid');
+  if (!list.length) { grid.innerHTML = '<div style="color:var(--text-dimmer);padding:2rem 0;">No tools match.</div>'; return; }
+  grid.innerHTML = list.map(function(t) {
+    return '<a class="card" href="'+t.url+'" target="_blank" rel="noopener" onmousemove="cardGlow(event)">'
+      + '<div class="card-icon"><img src="'+t.icon+'" alt="'+t.name+'" onerror="this.parentElement.innerHTML=\'📦\';this.parentElement.style.display=\'flex\';this.parentElement.style.alignItems=\'center\';this.parentElement.style.justifyContent=\'center\';this.parentElement.style.fontSize=\'24px\';this.parentElement.style.background=\'rgba(255,255,255,.06)\';"></div>'
+      + '<div class="card-title">'+t.name+'</div>'
+      + '<div class="card-desc">'+t.desc+'</div>'
+      + '<div class="card-foot"><span class="card-tag">'+t.tag+'</span><span class="card-arrow">→</span></div>'
+      + '</a>';
+  }).join('');
+}
+function cardGlow(e) {
+  var r = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+  e.currentTarget.style.setProperty('--my', (e.clientY - r.top) + 'px');
+}
+document.getElementById('filterInput').addEventListener('input', function() {
+  var q = this.value.toLowerCase();
+  renderGrid(TOOLS.filter(function(t){ return (t.name+' '+t.desc+' '+t.tag).toLowerCase().includes(q); }));
+});
+renderGrid(TOOLS);
+
+function updateClock() {
+  var now = new Date();
+  var h = now.getHours();
+  document.getElementById('clockTime').textContent = now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  document.getElementById('clockDate').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  var greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').innerHTML = greet + ', <span>team</span>.';
+}
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>
