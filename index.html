@@ -18,93 +18,170 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --navy:#0a1628;--navy2:#0f2341;--navy3:#1a3a6b;
-  --green:#4caf50;--green-light:#7ed67f;
-  --blue:#2e73d4;--blue-light:#6aadff;
-  --text:#f4f7fc;--text-dim:rgba(244,247,252,.6);--text-dimmer:rgba(244,247,252,.38);
-  --glass:rgba(255,255,255,.055);--glass-border:rgba(255,255,255,.09);--glass-hover:rgba(255,255,255,.09);
-  --radius:20px;
+  --navy:#060d1a;--navy2:#0d1f38;--navy3:#123055;
+  --green:#43a047;--green-light:#8fe396;--green-deep:#1b6b2e;
+  --text:#f4f7fc;--text-dim:rgba(244,247,252,.58);--text-dimmer:rgba(244,247,252,.34);
+  --glass:rgba(255,255,255,.045);--glass-border:rgba(255,255,255,.08);--glass-hover:rgba(255,255,255,.075);
+  --radius:18px;
 }
 html,body{height:100%;}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   color:var(--text);
   background:
-    radial-gradient(circle at 15% -10%, rgba(46,115,212,.25), transparent 45%),
-    radial-gradient(circle at 90% 10%, rgba(106,173,255,.12), transparent 40%),
-    linear-gradient(160deg,var(--navy) 0%,var(--navy2) 55%,var(--navy3) 100%);
+    radial-gradient(ellipse 900px 500px at 12% -8%, rgba(67,160,71,.16), transparent 55%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(18,48,85,.5), transparent 60%),
+    radial-gradient(ellipse 800px 600px at 50% 120%, rgba(27,107,46,.1), transparent 60%),
+    linear-gradient(175deg,var(--navy) 0%,#081527 45%,var(--navy) 100%);
   background-attachment:fixed;
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
 }
-/* subtle ambient noise/orbs */
-.orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;opacity:.35;}
-.orb1{width:420px;height:420px;background:#4caf50;top:-140px;right:-120px;opacity:.2;}
-.orb2{width:360px;height:360px;background:#2e73d4;bottom:-160px;left:-100px;opacity:.15;}
+/* faint dot-grid texture for depth */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size:26px 26px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+}
+/* subtle ambient orbs, green only, slow drift */
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;}
+.orb1{width:480px;height:480px;background:var(--green-deep);top:-160px;right:-140px;opacity:.22;animation:drift1 22s ease-in-out infinite;}
+.orb2{width:380px;height:380px;background:var(--navy3);bottom:-180px;left:-120px;opacity:.5;animation:drift2 26s ease-in-out infinite;}
+@keyframes drift1{0%,100%{transform:translate(0,0);}50%{transform:translate(-24px,28px);}}
+@keyframes drift2{0%,100%{transform:translate(0,0);}50%{transform:translate(26px,-20px);}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none;}}
 
-.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:3.2rem 2rem 4rem;}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:3rem 2rem 4rem;}
 
 /* header */
-.hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:2.6rem;flex-wrap:wrap;}
-.brand{display:flex;align-items:center;gap:14px;}
-.brand-badge{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--navy2),var(--navy3));border:1px solid rgba(76,175,80,.4);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-weight:800;font-size:14px;box-shadow:0 8px 24px rgba(76,175,80,.2);flex-shrink:0;}
-.brand-badge span{color:var(--green-light);}
-.brand-name{font-size:15px;font-weight:600;color:var(--text-dim);letter-spacing:.4px;text-transform:uppercase;}
-.greeting{font-size:34px;font-weight:700;letter-spacing:-.5px;margin-top:2px;}
+.hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:2.8rem;flex-wrap:wrap;
+  animation:fadeUp .5s ease both;}
+.brand{display:flex;align-items:center;gap:13px;}
+.brand-badge{width:44px;height:44px;border-radius:12px;overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);flex-shrink:0;}
+.brand-badge img{width:100%;height:100%;object-fit:cover;display:block;}
+.brand-name{font-size:12.5px;font-weight:700;color:var(--text-dimmer);letter-spacing:1.2px;text-transform:uppercase;}
+.greeting{font-size:33px;font-weight:700;letter-spacing:-.6px;margin-top:3px;}
 .greeting span{background:linear-gradient(90deg,#fff,var(--green-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-.clock{text-align:right;color:var(--text-dim);font-size:13px;}
-.clock .time{font-size:22px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
+.clock{text-align:right;color:var(--text-dimmer);font-size:12.5px;}
+.clock .time{font-size:21px;font-weight:600;color:var(--text-dim);font-variant-numeric:tabular-nums;letter-spacing:-.2px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
 /* search */
-.search-row{margin-bottom:2.2rem;position:relative;max-width:420px;}
+.search-row{margin-bottom:2rem;position:relative;max-width:400px;
+  animation:fadeUp .5s ease .05s both;}
 .search-row input{
-  width:100%;padding:13px 18px 13px 42px;border-radius:14px;
+  width:100%;padding:12px 16px 12px 40px;border-radius:12px;
   border:1px solid var(--glass-border);background:var(--glass);
-  color:var(--text);font-size:14px;font-family:inherit;backdrop-filter:blur(12px);
+  color:var(--text);font-size:13.5px;font-family:inherit;backdrop-filter:blur(14px);
   transition:all .15s;
 }
 .search-row input::placeholder{color:var(--text-dimmer);}
-.search-row input:focus{outline:none;border-color:var(--green);background:rgba(76,175,80,.08);}
-.search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);opacity:.5;font-size:14px;pointer-events:none;}
+.search-row input:focus{outline:none;border-color:rgba(67,160,71,.55);background:rgba(67,160,71,.06);box-shadow:0 0 0 3px rgba(67,160,71,.1);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.4;font-size:13px;pointer-events:none;}
 
 /* grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:14px;}
 .card{
   position:relative;overflow:hidden;
-  background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);
-  padding:22px 22px 20px;backdrop-filter:blur(16px);
+  background:linear-gradient(155deg, var(--glass), rgba(255,255,255,.02));
+  border:1px solid var(--glass-border);border-radius:var(--radius);
+  padding:20px 20px 18px;backdrop-filter:blur(18px);
   text-decoration:none;color:inherit;display:block;
-  transition:transform .22s cubic-bezier(.2,.8,.2,1), background .22s, border-color .22s, box-shadow .22s;
+  transition:transform .25s cubic-bezier(.2,.8,.2,1), background .25s, border-color .25s, box-shadow .25s;
   cursor:pointer;
+  animation:fadeUp .5s ease both;
+}
+.card::after{
+  content:'';position:absolute;top:0;left:14px;right:14px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);
 }
 .card:hover{
-  transform:translateY(-4px);
-  background:var(--glass-hover);
-  border-color:rgba(255,255,255,.18);
-  box-shadow:0 20px 50px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04);
+  transform:translateY(-5px);
+  background:linear-gradient(155deg, var(--glass-hover), rgba(255,255,255,.03));
+  border-color:rgba(143,227,150,.28);
+  box-shadow:0 22px 44px rgba(0,0,0,.4), 0 0 0 1px rgba(67,160,71,.08), 0 0 30px rgba(67,160,71,.06);
 }
 .card::before{
-  content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;
-  background:radial-gradient(400px circle at var(--mx,50%) var(--my,0%), rgba(255,255,255,.08), transparent 60%);
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;
+  background:radial-gradient(360px circle at var(--mx,50%) var(--my,0%), rgba(143,227,150,.09), transparent 60%);
   pointer-events:none;
 }
 .card:hover::before{opacity:1;}
 .card-icon{
-  width:54px;height:54px;border-radius:14px;overflow:hidden;
-  margin-bottom:16px;box-shadow:0 8px 20px rgba(0,0,0,.35);
+  width:52px;height:52px;border-radius:13px;overflow:hidden;
+  margin-bottom:15px;box-shadow:0 8px 18px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);
+  transition:transform .25s;
 }
+.card:hover .card-icon{transform:scale(1.04);}
 .card-icon img{width:100%;height:100%;object-fit:cover;display:block;}
-.card-title{font-size:16px;font-weight:700;margin-bottom:5px;letter-spacing:-.2px;}
-.card-desc{font-size:13px;color:var(--text-dim);line-height:1.5;margin-bottom:16px;min-height:38px;}
+.card-title{font-size:15.5px;font-weight:700;margin-bottom:5px;letter-spacing:-.2px;}
+.card-desc{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin-bottom:15px;min-height:36px;}
 .card-foot{display:flex;align-items:center;justify-content:space-between;}
-.card-tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 9px;border-radius:20px;background:rgba(76,175,80,.14);color:var(--green-light);}
-.card-arrow{font-size:16px;color:var(--text-dimmer);transition:transform .2s, color .2s;}
-.card:hover .card-arrow{transform:translateX(3px);color:var(--text);}
+.card-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 9px;border-radius:20px;background:rgba(67,160,71,.14);color:var(--green-light);border:1px solid rgba(67,160,71,.18);}
+.card-arrow{font-size:15px;color:var(--text-dimmer);transition:transform .2s, color .2s;}
+.card:hover .card-arrow{transform:translateX(3px);color:var(--green-light);}
 
 /* footer */
-.footer{margin-top:3rem;text-align:center;color:var(--text-dimmer);font-size:12px;}
-.footer a{color:var(--text-dim);text-decoration:none;}
+.footer{margin-top:2.6rem;text-align:center;color:var(--text-dimmer);font-size:11.5px;letter-spacing:.2px;}
+.footer a{color:var(--text-dim);text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.2);}
+.footer a:hover{color:var(--green-light);border-color:rgba(143,227,150,.4);}
+
+/* schedule strip */
+.sched{margin-top:2.8rem;animation:fadeUp .5s ease .1s both;}
+.sched-hdr{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.sched-title{font-size:18px;font-weight:700;letter-spacing:-.3px;flex:1;}
+.sched-range{font-size:12.5px;color:var(--text-dimmer);}
+.sched-nav{display:flex;gap:6px;}
+.sched-nav button{
+  width:30px;height:30px;border-radius:9px;border:1px solid var(--glass-border);background:var(--glass);
+  color:var(--text-dim);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;font-family:inherit;
+}
+.sched-nav button:hover{background:rgba(67,160,71,.14);border-color:rgba(67,160,71,.35);color:var(--green-light);}
+.sched-today-btn{
+  font-size:11.5px;font-weight:600;padding:0 12px;border-radius:9px;border:1px solid var(--glass-border);
+  background:var(--glass);color:var(--text-dim);cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.sched-today-btn:hover{background:rgba(67,160,71,.14);border-color:rgba(67,160,71,.35);color:var(--green-light);}
+.sched-strip{
+  display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 10px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;
+}
+.sched-strip::-webkit-scrollbar{height:6px;}
+.sched-strip::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:10px;}
+.sched-day{
+  scroll-snap-align:start;flex:0 0 240px;min-height:120px;
+  background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;
+  padding:14px;backdrop-filter:blur(14px);
+}
+.sched-day.is-today{border-color:rgba(143,227,150,.4);background:rgba(67,160,71,.07);box-shadow:0 0 0 1px rgba(67,160,71,.12);}
+.sched-day-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+.sched-day-name{font-size:12.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;}
+.sched-day.is-today .sched-day-name{color:var(--green-light);}
+.sched-day-date{font-size:11px;color:var(--text-dimmer);}
+.sched-day-count{font-size:10px;color:var(--text-dimmer);background:rgba(255,255,255,.06);padding:2px 7px;border-radius:10px;}
+.sched-job{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;
+  padding:9px 10px;margin-bottom:7px;cursor:pointer;transition:background .15s,border-color .15s;
+}
+.sched-job:last-child{margin-bottom:0;}
+.sched-job:hover{background:rgba(67,160,71,.1);border-color:rgba(67,160,71,.25);}
+.sched-job-time{font-size:11px;font-weight:700;color:var(--green-light);margin-bottom:3px;}
+.sched-job-cust{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:2px;line-height:1.3;}
+.sched-job-tech{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
+.sched-job-detail{
+  display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);
+  font-size:11.5px;color:var(--text-dim);line-height:1.5;
+}
+.sched-job.open .sched-job-detail{display:block;}
+.sched-empty{font-size:11.5px;color:var(--text-dimmer);text-align:center;padding:1.4rem 0;}
+.sched-state{font-size:12.5px;color:var(--text-dimmer);padding:1.5rem;text-align:center;}
+.sched-state a{color:var(--green-light);}
+@media(max-width:600px){
+  .sched-day{flex-basis:78vw;}
+}
 
 /* embedded tool viewer */
 .viewer{position:fixed;inset:0;z-index:50;background:var(--navy);display:none;flex-direction:column;}
@@ -146,7 +223,7 @@ body{
   <div class="hdr">
     <div>
       <div class="brand">
-        <div class="brand-badge">NA<span>G</span></div>
+        <div class="brand-badge"><img src="icons/icon-hub.png" alt="NAGeo"></div>
         <div class="brand-name">North American Geothermal</div>
       </div>
       <div class="greeting" id="greeting">Good day, <span>team</span>.</div>
@@ -163,6 +240,19 @@ body{
   </div>
 
   <div class="grid" id="grid"></div>
+
+  <div class="sched">
+    <div class="sched-hdr">
+      <div class="sched-title">This Week's Schedule</div>
+      <div class="sched-range" id="schedRange"></div>
+      <button class="sched-today-btn" onclick="jumpToToday()">Today</button>
+      <div class="sched-nav">
+        <button onclick="shiftWeek(-1)" title="Previous week">←</button>
+        <button onclick="shiftWeek(1)" title="Next week">→</button>
+      </div>
+    </div>
+    <div class="sched-strip" id="schedStrip"><div class="sched-state">Loading schedule…</div></div>
+  </div>
 
   <div class="footer">NAGeo Hub &middot; six tools, one front door &middot; <a href="#" id="editLinksNote">edit URLs in index.html</a></div>
 </div>
@@ -194,7 +284,7 @@ function renderGrid(list) {
   if (!list.length) { grid.innerHTML = '<div style="color:var(--text-dimmer);padding:2rem 0;">No tools match.</div>'; return; }
   grid.innerHTML = list.map(function(t, i) {
     var realIdx = TOOLS.indexOf(t);
-    return '<a class="card" href="'+t.url+'" data-idx="'+realIdx+'" onclick="return openTool(event,'+realIdx+')" onmousemove="cardGlow(event)">'
+    return '<a class="card" href="'+t.url+'" data-idx="'+realIdx+'" style="animation-delay:'+(i*0.05)+'s" onclick="return openTool(event,'+realIdx+')" onmousemove="cardGlow(event)">'
       + '<div class="card-icon"><img src="'+t.icon+'" alt="'+t.name+'" onerror="this.parentElement.innerHTML=\'📦\';this.parentElement.style.display=\'flex\';this.parentElement.style.alignItems=\'center\';this.parentElement.style.justifyContent=\'center\';this.parentElement.style.fontSize=\'24px\';this.parentElement.style.background=\'rgba(255,255,255,.06)\';"></div>'
       + '<div class="card-title">'+t.name+'</div>'
       + '<div class="card-desc">'+t.desc+'</div>'
@@ -237,6 +327,128 @@ window.addEventListener('popstate', function() {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && document.getElementById('viewer').classList.contains('open')) closeViewer();
 });
+
+// ══════════════════════════════════════════════════════════
+// SCHEDULE STRIP — pulls "who's going where" from a Supabase Edge Function
+// that proxies Housecall Pro (see nageo-hub-schedule/function.ts for the
+// backend code to deploy — a browser can't safely call HCP directly since
+// that needs your API key).
+// ══════════════════════════════════════════════════════════
+var SCHEDULE_API_URL = ""; // ← paste your deployed edge function URL here, e.g. "https://xxxx.supabase.co/functions/v1/nageo-hub-schedule"
+var SCHEDULE_ANON_KEY = ""; // ← your Supabase project's anon/publishable key, sent as a Bearer token
+var DEMO_SCHEDULE = true;   // ← set to false once SCHEDULE_API_URL is live; shows sample data until then
+
+var weekOffset = 0;
+var scheduleCache = {}; // keyed by "YYYY-MM-DD" -> array of jobs
+
+function startOfWeek(d) {
+  var x = new Date(d);
+  var day = x.getDay(); // 0=Sun
+  var diff = day === 0 ? -6 : 1 - day; // Monday as start
+  x.setDate(x.getDate() + diff);
+  x.setHours(0,0,0,0);
+  return x;
+}
+function fmtISO(d) { return d.toISOString().slice(0,10); }
+function fmtDayLabel(d) { return d.toLocaleDateString('en-US',{weekday:'short'}); }
+function fmtDateLabel(d) { return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function isSameDay(a,b) { return fmtISO(a) === fmtISO(b); }
+
+function demoJobsFor(dateStr, idx) {
+  // Sample data so the strip looks right before the real endpoint is wired up.
+  var pool = [
+    [{time:"8:00 – 10:00 AM", customer:"Gary H. — Fairfax, VA", tech:"Mike R.", type:"Service call", notes:"Annual maintenance check, WaterFurnace 7 Series."}],
+    [{time:"9:30 – 12:00 PM", customer:"Torres residence — Vienna, VA", tech:"Dana P.", type:"Install", notes:"Loop field completion, day 2 of 3."},
+     {time:"1:00 – 3:00 PM", customer:"Chen residence — Oakton, VA", tech:"Mike R.", type:"Repair", notes:"Compressor diagnostic."}],
+    [],
+    [{time:"7:30 – 9:00 AM", customer:"Patel residence — Reston, VA", tech:"Dana P.", type:"Install", notes:"Equipment installation, startup scheduled after."}],
+    [{time:"10:00 – 11:30 AM", customer:"Foster residence — McLean, VA", tech:"Sam W.", type:"Service call", notes:""}]
+  ];
+  return pool[idx % pool.length] || [];
+}
+
+async function fetchScheduleWeek(weekStartDate) {
+  var start = fmtISO(weekStartDate);
+  var endD = new Date(weekStartDate); endD.setDate(endD.getDate()+6);
+  var end = fmtISO(endD);
+  if (DEMO_SCHEDULE || !SCHEDULE_API_URL) {
+    var byDate = {};
+    for (var i=0;i<7;i++){
+      var d = new Date(weekStartDate); d.setDate(d.getDate()+i);
+      byDate[fmtISO(d)] = demoJobsFor(fmtISO(d), i);
+    }
+    return byDate;
+  }
+  var res = await fetch(SCHEDULE_API_URL + '?start=' + start + '&end=' + end, {
+    headers: SCHEDULE_ANON_KEY ? { 'Authorization': 'Bearer ' + SCHEDULE_ANON_KEY } : {}
+  });
+  if (!res.ok) throw new Error('Schedule fetch failed (' + res.status + ')');
+  var data = await res.json();
+  var grouped = {};
+  (data.jobs || []).forEach(function(j) {
+    if (!grouped[j.date]) grouped[j.date] = [];
+    grouped[j.date].push(j);
+  });
+  return grouped;
+}
+
+async function renderSchedule() {
+  var strip = document.getElementById('schedStrip');
+  var weekStart = startOfWeek(new Date());
+  weekStart.setDate(weekStart.getDate() + weekOffset*7);
+  var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+  document.getElementById('schedRange').textContent = fmtDateLabel(weekStart) + ' – ' + fmtDateLabel(weekEnd);
+
+  strip.innerHTML = '<div class="sched-state">Loading schedule…</div>';
+  var byDate;
+  try {
+    byDate = await fetchScheduleWeek(weekStart);
+  } catch (err) {
+    strip.innerHTML = '<div class="sched-state">Couldn\'t load the schedule. Check SCHEDULE_API_URL in index.html.<br>(' + err.message + ')</div>';
+    return;
+  }
+
+  var today = new Date();
+  var html = '';
+  var todayIdx = -1;
+  for (var i=0;i<7;i++) {
+    var d = new Date(weekStart); d.setDate(d.getDate()+i);
+    var key = fmtISO(d);
+    var jobs = byDate[key] || [];
+    var today_ = isSameDay(d, today);
+    if (today_) todayIdx = i;
+    html += '<div class="sched-day' + (today_?' is-today':'') + '" id="schedDay'+i+'">';
+    html += '<div class="sched-day-hdr"><div><div class="sched-day-name">' + (today_?'Today':fmtDayLabel(d)) + '</div><div class="sched-day-date">' + fmtDateLabel(d) + '</div></div>';
+    html += '<div class="sched-day-count">' + jobs.length + '</div></div>';
+    if (!jobs.length) {
+      html += '<div class="sched-empty">No jobs scheduled</div>';
+    } else {
+      jobs.forEach(function(j) {
+        html += '<div class="sched-job" onclick="this.classList.toggle(\'open\')">';
+        html += '<div class="sched-job-time">' + (j.time||'') + '</div>';
+        html += '<div class="sched-job-cust">' + (j.customer||'') + '</div>';
+        html += '<div class="sched-job-tech">👤 ' + (j.tech||'Unassigned') + '</div>';
+        if (j.type || j.notes) {
+          html += '<div class="sched-job-detail">';
+          if (j.type) html += '<strong>' + j.type + '</strong><br>';
+          if (j.notes) html += j.notes;
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+  }
+  strip.innerHTML = html;
+  if (todayIdx !== -1) {
+    var el = document.getElementById('schedDay'+todayIdx);
+    if (el) el.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  }
+}
+function shiftWeek(delta) { weekOffset += delta; renderSchedule(); }
+function jumpToToday() { weekOffset = 0; renderSchedule(); }
+renderSchedule();
+setInterval(function(){ if (weekOffset === 0) renderSchedule(); }, 5*60*1000); // refresh current week every 5 min
 
 function updateClock() {
   var now = new Date();
