@@ -182,7 +182,9 @@ body::before{
 }
 .sched-job:last-child{margin-bottom:0;}
 .sched-job:hover{background:rgba(67,160,71,.1);border-color:rgba(67,160,71,.25);}
-.sched-job-time{font-size:11px;font-weight:700;color:var(--green-light);margin-bottom:3px;}
+.sched-job-time-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:3px;}
+.sched-job-time{font-size:11px;font-weight:700;color:var(--green-light);}
+.sched-job-id{font-size:9.5px;color:var(--text-dimmer);font-family:'SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;flex-shrink:0;}
 .sched-job-cust{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:2px;line-height:1.3;}
 .sched-job-tech{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
 .sched-job-detail{
@@ -222,6 +224,7 @@ body::before{
 .mini-tv .tv-job-cust{font-size:13.5px;margin-bottom:2px;}
 .mini-tv .tv-job-addr{font-size:11px;margin-bottom:4px;}
 .mini-tv .tv-job-type{font-size:9px;padding:2px 7px;}
+.mini-tv .tv-job-id{font-size:9px;padding:2px 7px;}
 .mini-tv .tv-job-notes{font-size:11px;margin-top:5px;}
 .mini-tv .tv-map{border-radius:13px;}
 .mini-tv .tv-empty-day-icon{font-size:32px;}
@@ -283,6 +286,7 @@ body::before{
 .tv-job-addr{font-size:15px;color:var(--text-dim);margin-bottom:8px;}
 .tv-job-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 .tv-job-type{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:20px;background:rgba(67,160,71,.16);color:var(--green-light);}
+.tv-job-id{font-size:12px;font-weight:700;letter-spacing:.3px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.08);color:var(--text-dim);font-variant-numeric:tabular-nums;font-family:'SF Mono',Menlo,Consolas,monospace;}
 .tv-job-notes{font-size:14px;color:var(--text-dim);margin-top:8px;line-height:1.5;font-style:italic;}
 .tv-map{border-radius:20px;overflow:hidden;border:1px solid var(--glass-border);background:rgba(255,255,255,.03);min-height:0;position:relative;}
 .tv-map iframe{width:100%;height:100%;border:0;filter:saturate(.85) brightness(.92);}
@@ -531,15 +535,15 @@ function isSameDay(a,b) { return fmtISO(a) === fmtISO(b); }
 function demoJobsFor(dateStr, idx) {
   // Sample data so the strip (and TV Mode) look right before the real endpoint is wired up.
   var pool = [
-    [{time:"8:00 – 9:00 AM", customer:"Gary H. — Fairfax, VA", address:"11530 Valley Rd, Fairfax, VA 22033", tech:"Mike R.", type:"Service call", notes:"Annual maintenance check, WaterFurnace 7 Series."},
-     {time:"10:30 – 11:30 AM", customer:"Reyes residence — Fairfax, VA", address:"4200 Legato Rd, Fairfax, VA 22033", tech:"Mike R.", type:"Repair", notes:"No heat call, check fault code."},
-     {time:"1:00 – 2:30 PM", customer:"Bell residence — Fairfax, VA", address:"9990 Fairfax Blvd, Fairfax, VA 22030", tech:"Mike R.", type:"Service call", notes:"Filter + coil cleaning."}],
-    [{time:"9:30 – 12:00 PM", customer:"Torres residence — Vienna, VA", address:"144 Maple Ave, Vienna, VA 22180", tech:"Dana P.", type:"Install", notes:"Loop field completion, day 2 of 3."},
-     {time:"1:00 – 3:00 PM", customer:"Chen residence — Oakton, VA", address:"2946 Hunter Mill Rd, Oakton, VA 22124", tech:"Sam W.", type:"Repair", notes:"Compressor diagnostic."}],
+    [{jobId:"10482", time:"8:00 – 9:00 AM", customer:"Gary H. — Fairfax, VA", address:"11530 Valley Rd, Fairfax, VA 22033", tech:"Mike R.", type:"Service call", notes:"Annual maintenance check, WaterFurnace 7 Series."},
+     {jobId:"10483", time:"10:30 – 11:30 AM", customer:"Reyes residence — Fairfax, VA", address:"4200 Legato Rd, Fairfax, VA 22033", tech:"Mike R.", type:"Repair", notes:"No heat call, check fault code."},
+     {jobId:"10484", time:"1:00 – 2:30 PM", customer:"Bell residence — Fairfax, VA", address:"9990 Fairfax Blvd, Fairfax, VA 22030", tech:"Mike R.", type:"Service call", notes:"Filter + coil cleaning."}],
+    [{jobId:"10491", time:"9:30 – 12:00 PM", customer:"Torres residence — Vienna, VA", address:"144 Maple Ave, Vienna, VA 22180", tech:"Dana P.", type:"Install", notes:"Loop field completion, day 2 of 3."},
+     {jobId:"10492", time:"1:00 – 3:00 PM", customer:"Chen residence — Oakton, VA", address:"2946 Hunter Mill Rd, Oakton, VA 22124", tech:"Sam W.", type:"Repair", notes:"Compressor diagnostic."}],
     [],
-    [{time:"7:30 – 9:00 AM", customer:"Patel residence — Reston, VA", address:"11700 Plaza America Dr, Reston, VA 20190", tech:"Dana P.", type:"Install", notes:"Equipment installation, startup scheduled after."},
-     {time:"9:30 – 10:30 AM", customer:"Nguyen residence — Reston, VA", address:"1801 Reston Pkwy, Reston, VA 20190", tech:"Dana P.", type:"Service call", notes:"Thermostat replacement."}],
-    [{time:"10:00 – 11:30 AM", customer:"Foster residence — McLean, VA", address:"1364 Beverly Rd, McLean, VA 22101", tech:"Sam W.", type:"Service call", notes:""}]
+    [{jobId:"10503", time:"7:30 – 9:00 AM", customer:"Patel residence — Reston, VA", address:"11700 Plaza America Dr, Reston, VA 20190", tech:"Dana P.", type:"Install", notes:"Equipment installation, startup scheduled after."},
+     {jobId:"10504", time:"9:30 – 10:30 AM", customer:"Nguyen residence — Reston, VA", address:"1801 Reston Pkwy, Reston, VA 20190", tech:"Dana P.", type:"Service call", notes:"Thermostat replacement."}],
+    [{jobId:"10510", time:"10:00 – 11:30 AM", customer:"Foster residence — McLean, VA", address:"1364 Beverly Rd, McLean, VA 22101", tech:"Sam W.", type:"Service call", notes:""}]
   ];
   return pool[idx % pool.length] || [];
 }
@@ -658,7 +662,7 @@ function renderOverview() {
     } else {
       jobs.forEach(function(j) {
         html += '<div class="sched-job" onclick="this.classList.toggle(\'open\')">';
-        html += '<div class="sched-job-time">' + (j.time||'') + '</div>';
+        html += '<div class="sched-job-time-row"><span class="sched-job-time">' + (j.time||'') + '</span>' + (j.jobId ? '<span class="sched-job-id">#'+j.jobId+'</span>' : '') + '</div>';
         html += '<div class="sched-job-cust">' + (j.customer||'') + '</div>';
         html += '<div class="sched-job-tech">👤 ' + (j.tech||'Unassigned') + '</div>';
         if (j.type || j.notes) {
@@ -771,7 +775,7 @@ function slideContentHtml(s) {
     html += '<div class="tv-job-time">' + (j.time||'') + '</div>';
     html += '<div class="tv-job-cust">' + (j.customer||'') + '</div>';
     if (j.address) html += '<div class="tv-job-addr">📍 ' + j.address + '</div>';
-    html += '<div class="tv-job-meta">' + (j.type ? '<span class="tv-job-type">'+j.type+'</span>' : '') + '</div>';
+    html += '<div class="tv-job-meta">' + (j.jobId ? '<span class="tv-job-id">#'+j.jobId+'</span>' : '') + (j.type ? '<span class="tv-job-type">'+j.type+'</span>' : '') + '</div>';
     if (j.notes) html += '<div class="tv-job-notes">' + j.notes + '</div>';
     html += '</div>';
   });
