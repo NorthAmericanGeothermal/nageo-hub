@@ -246,7 +246,12 @@ body::before{
 .tv-top{position:relative;z-index:2;display:flex;align-items:center;gap:16px;padding:22px 40px 10px;flex-shrink:0;}
 .tv-top-badge{width:42px;height:42px;border-radius:11px;overflow:hidden;flex-shrink:0;}
 .tv-top-badge img{width:100%;height:100%;object-fit:cover;display:block;}
-.tv-top-title{font-size:15px;font-weight:700;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:1.5px;}
+.tv-top-day{
+  font-size:28px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--navy);background:var(--green-light);padding:7px 20px;border-radius:12px;
+  box-shadow:0 6px 20px rgba(67,160,71,.3);flex-shrink:0;
+}
+.tv-top-title{font-size:13px;font-weight:700;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:1.5px;}
 .tv-top-clock{margin-left:auto;font-size:20px;color:var(--text-dim);font-variant-numeric:tabular-nums;}
 .tv-exit{
   margin-left:16px;width:38px;height:38px;border-radius:10px;border:1px solid var(--glass-border);
@@ -257,7 +262,11 @@ body::before{
 
 .tv-slide-wrap{position:relative;z-index:1;flex:1;min-height:0;padding:10px 40px 30px;display:flex;flex-direction:column;}
 .tv-slide-hdr{margin-bottom:20px;}
-.tv-slide-day{font-size:15px;font-weight:700;color:var(--green-light);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;}
+.tv-slide-day{
+  display:inline-block;font-size:34px;font-weight:800;text-transform:uppercase;letter-spacing:1px;
+  color:var(--navy);background:var(--green-light);padding:9px 24px;border-radius:14px;
+  margin-bottom:16px;box-shadow:0 8px 28px rgba(67,160,71,.35);
+}
 .tv-slide-tech{font-size:44px;font-weight:800;letter-spacing:-1px;display:flex;align-items:center;gap:16px;}
 .tv-slide-tech-avatar{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--green-deep));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0;box-shadow:0 8px 24px rgba(67,160,71,.3);}
 .tv-slide-count{font-size:16px;color:var(--text-dim);font-weight:500;margin-left:4px;}
@@ -305,6 +314,8 @@ body::before{
   .tv-body{grid-template-columns:1fr;}
   .tv-map{min-height:220px;}
   .tv-slide-tech{font-size:30px;}
+  .tv-slide-day{font-size:22px;padding:7px 16px;}
+  .tv-top-day{font-size:17px;padding:5px 12px;}
 }
 
 /* embedded tool viewer */
@@ -411,7 +422,8 @@ body::before{
   <div class="tv-bg"></div>
   <div class="tv-top">
     <div class="tv-top-badge"><img src="icons/icon-hub.png" alt="NAGeo"></div>
-    <div class="tv-top-title">Today's Routes — NAGeo</div>
+    <div class="tv-top-day" id="tvTopDay">—</div>
+    <div class="tv-top-title">NAGeo Routes</div>
     <div class="tv-top-clock" id="tvClock">--:--</div>
     <button class="tv-exit" onclick="closeTVMode()" title="Exit TV Mode (Esc)">✕</button>
   </div>
@@ -773,8 +785,15 @@ function slideContentHtml(s) {
 }
 
 function renderCurrentSlide() {
-  if (!tvSlides.length) { setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">🗓️</div><div class="tv-empty-day-text">No jobs scheduled this week.</div></div>'); return; }
-  setSlideContainers(slideContentHtml(tvSlides[tvIndex]));
+  var topDay = document.getElementById('tvTopDay');
+  if (!tvSlides.length) {
+    setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">🗓️</div><div class="tv-empty-day-text">No jobs scheduled this week.</div></div>');
+    if (topDay) topDay.textContent = '—';
+    return;
+  }
+  var s = tvSlides[tvIndex];
+  if (topDay) topDay.textContent = s.dayLabel + ' · ' + s.dateLabel;
+  setSlideContainers(slideContentHtml(s));
   updateProgressState();
   requestAnimationFrame(function() {
     ['mini','tv'].forEach(function(prefix) {
