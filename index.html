@@ -534,11 +534,11 @@ function demoJobsFor(dateStr, idx) {
 
 async function fetchScheduleWeek(weekStartDate) {
   var start = fmtISO(weekStartDate);
-  var endD = new Date(weekStartDate); endD.setDate(endD.getDate()+6);
+  var endD = new Date(weekStartDate); endD.setDate(endD.getDate()+4); // Mon–Fri only, no weekend jobs
   var end = fmtISO(endD);
   if (DEMO_SCHEDULE || !SCHEDULE_API_URL) {
     var byDate = {};
-    for (var i=0;i<7;i++){
+    for (var i=0;i<5;i++){
       var d = new Date(weekStartDate); d.setDate(d.getDate()+i);
       byDate[fmtISO(d)] = demoJobsFor(fmtISO(d), i);
     }
@@ -576,7 +576,7 @@ var currentWeekStart = null;
 async function loadWeekSlides() {
   var weekStart = startOfWeek(new Date());
   weekStart.setDate(weekStart.getDate() + weekOffset*7);
-  var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+  var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+4); // Mon–Fri only, no weekend jobs
   document.getElementById('schedRange').textContent = fmtDateLabel(weekStart) + ' – ' + fmtDateLabel(weekEnd);
 
   setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">📡</div><div class="tv-empty-day-text">Loading schedule…</div></div>');
@@ -632,7 +632,7 @@ function renderOverview() {
   var today = new Date();
   var html = '';
   var todayIdx = -1;
-  for (var i=0;i<7;i++) {
+  for (var i=0;i<5;i++) { // Mon–Fri only, no weekend jobs
     var d = new Date(weekStart); d.setDate(d.getDate()+i);
     var key = fmtISO(d);
     var jobs = byDate[key] || [];
@@ -682,7 +682,7 @@ function mapEmbedUrl(stops) {
 function buildTVSlides(byDate, weekStart) {
   var slides = [];
   var today = new Date();
-  for (var i=0;i<7;i++) {
+  for (var i=0;i<5;i++) { // Mon–Fri only, no weekend jobs
     var d = new Date(weekStart); d.setDate(d.getDate()+i);
     var key = fmtISO(d);
     var jobs = byDate[key] || [];
