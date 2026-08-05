@@ -231,6 +231,11 @@ body::before{
 .mini-tv .tv-empty-day-text{font-size:12.5px;}
 .mini-tv .tv-progress{padding:0 0 10px;position:static;}
 .mini-tv .tv-dot{height:3px;}
+.mini-tv .tv-lead-body{gap:10px;}
+.mini-tv .ld-slide-overview{font-size:12.5px;padding:11px 13px;border-radius:12px;}
+.mini-tv .ld-slide-email{padding:10px 13px;border-radius:12px;}
+.mini-tv .ld-slide-email-meta{font-size:10px;margin-bottom:4px;}
+.mini-tv .ld-slide-email-body{font-size:12px;}
 @media(max-width:700px){
   .mini-slide-wrap{height:auto;}
   .mini-tv .tv-body{grid-template-columns:1fr;}
@@ -295,6 +300,52 @@ body::before{
 .tv-empty-day{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--text-dimmer);}
 .tv-empty-day-icon{font-size:56px;opacity:.4;}
 .tv-empty-day-text{font-size:20px;}
+
+/* Lead slide — same header language as the schedule slide, but a single-column
+   body: the Gemini overview up top, latest email below. */
+.tv-lead-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:20px;overflow-y:auto;}
+.ld-slide-overview{
+  background:rgba(67,160,71,.12);border:1px solid rgba(67,160,71,.3);border-radius:20px;
+  padding:22px 26px;font-size:20px;line-height:1.55;color:var(--text);font-weight:500;
+}
+.ld-slide-overview.loading{color:var(--text-dimmer);font-style:italic;font-weight:400;background:rgba(255,255,255,.04);border-color:var(--glass-border);}
+.ld-slide-email{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:20px 24px;}
+.ld-slide-email.flag{background:rgba(220,38,38,.14);border-color:rgba(220,38,38,.35);}
+.ld-slide-email-meta{font-size:15px;color:var(--text-dim);margin-bottom:8px;font-weight:600;}
+.ld-slide-email.flag .ld-slide-email-meta{color:#fca5a5;}
+.ld-slide-email-body{font-size:18px;color:var(--text);line-height:1.5;}
+
+/* 'Both' mode — TV Mode only: schedule slide on top, lead slide below, each
+   scaled down so the split never feels cramped. The mini card handles
+   'both' differently (alternates full-size single slides) — see JS. */
+.tv-split{flex:1;min-height:0;display:flex;flex-direction:column;gap:16px;}
+.tv-split-pane{
+  flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;
+  background:rgba(255,255,255,.025);border:1px solid var(--glass-border);border-radius:22px;padding:18px 26px;
+}
+.tv-split-label{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--green-light);margin-bottom:10px;flex-shrink:0;}
+.tv-split-pane .tv-slide-hdr{margin-bottom:10px;}
+.tv-split-pane .tv-slide-day{font-size:16px;padding:5px 14px;margin-bottom:8px;}
+.tv-split-pane .tv-slide-tech{font-size:23px;gap:10px;}
+.tv-split-pane .tv-slide-tech-avatar{width:34px;height:34px;font-size:14px;border-radius:10px;}
+.tv-split-pane .tv-slide-count{font-size:13px;}
+.tv-split-pane .tv-body,.tv-split-pane .tv-lead-body{gap:12px;}
+.tv-split-pane .tv-job-card{padding:12px 16px;border-radius:14px;}
+.tv-split-pane .tv-job-time{font-size:14px;margin-bottom:3px;}
+.tv-split-pane .tv-job-cust{font-size:15px;margin-bottom:2px;}
+.tv-split-pane .tv-job-addr{font-size:12px;margin-bottom:5px;}
+.tv-split-pane .tv-job-type,.tv-split-pane .tv-job-id{font-size:10px;padding:3px 8px;}
+.tv-split-pane .tv-job-notes{font-size:11px;}
+.tv-split-pane .tv-map{border-radius:14px;}
+.tv-split-pane .tv-empty-day-icon{font-size:36px;}
+.tv-split-pane .tv-empty-day-text{font-size:15px;}
+.tv-split-pane .ld-slide-overview{font-size:15px;padding:14px 18px;border-radius:14px;}
+.tv-split-pane .ld-slide-email{padding:13px 16px;border-radius:14px;}
+.tv-split-pane .ld-slide-email-meta{font-size:12px;margin-bottom:5px;}
+.tv-split-pane .ld-slide-email-body{font-size:14px;}
+@media(max-width:900px){
+  .tv-split-pane .tv-body{grid-template-columns:1fr;}
+}
 
 .tv-progress{position:relative;z-index:2;display:flex;gap:6px;padding:0 40px 18px;flex-shrink:0;}
 .tv-dot{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;}
@@ -384,12 +435,17 @@ body::before{
     <div class="sched-hdr">
       <div class="sched-title">This Week's Schedule</div>
       <div class="sched-range" id="schedRange"></div>
+      <div class="sched-view-toggle content-mode-toggle" id="contentModeToggle">
+        <button class="sched-view-btn content-mode-btn active" data-mode="schedule" onclick="setContentMode('schedule')">📅 Schedule</button>
+        <button class="sched-view-btn content-mode-btn" data-mode="leads" onclick="setContentMode('leads')">🎯 Leads</button>
+        <button class="sched-view-btn content-mode-btn" data-mode="both" onclick="setContentMode('both')">⇄ Both</button>
+      </div>
       <div class="sched-view-toggle" id="schedViewToggle">
         <button class="sched-view-btn active" data-view="live" onclick="setSchedView('live')">Live</button>
         <button class="sched-view-btn" data-view="overview" onclick="setSchedView('overview')">Overview</button>
       </div>
-      <button class="sched-today-btn" onclick="jumpToToday()">Today</button>
-      <div class="sched-nav">
+      <button class="sched-today-btn" id="schedTodayBtn" onclick="jumpToToday()">Today</button>
+      <div class="sched-nav" id="schedNav">
         <button onclick="shiftWeek(-1)" title="Previous week">←</button>
         <button onclick="shiftWeek(1)" title="Next week">→</button>
       </div>
@@ -438,10 +494,11 @@ body::before{
       <button class="tv-ctrl-btn" onclick="slidePrev()" title="Previous">←</button>
       <button class="tv-ctrl-btn" onclick="slideNext()" title="Next">→</button>
     </div>
-    <button class="tv-ctrl-btn primary" id="tvPlayBtn" onclick="tvTogglePlay()" title="Pause / resume">⏸</button>
+    <button class="tv-ctrl-btn primary" id="tvPlayBtn" onclick="slideTogglePlay()" title="Pause / resume">⏸</button>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── Edit these to point at your real GitHub Pages URLs.
 // Icon files expected in an /icons folder next to this index.html — see filenames below.
@@ -518,6 +575,19 @@ var SCHEDULE_API_URL = "https://hpgwwegjsxyxovdattoc.supabase.co/functions/v1/qu
 var SCHEDULE_ANON_KEY = "sb_publishable_D2PqYQoJjZ8koEM9NPvmeg_KB_Wa66H"; // sent as a Bearer token
 var DEMO_SCHEDULE = false;  // set back to true any time to preview with sample data instead
 
+// NAGeo Leads lives in the same Supabase project as the schedule function —
+// same URL host, same anon key — so the hub can query its tables (leads,
+// email_threads, email_messages) directly with supabase-js, exactly like
+// the leads site itself does, no extra backend needed.
+var SUPABASE_URL = "https://hpgwwegjsxyxovdattoc.supabase.co";
+var sbClient = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SCHEDULE_ANON_KEY) : null;
+
+function esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function niceDate(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+}
+
 var weekOffset = 0;
 
 function startOfWeek(d) {
@@ -590,6 +660,12 @@ var schedView = 'live'; // 'live' (carousel) or 'overview' (7-day-at-a-glance gr
 var currentByDate = null;
 var currentWeekStart = null;
 
+var contentMode = 'schedule'; // 'schedule' | 'leads' | 'both' — what the carousel + TV Mode show
+var leadSlides = [];
+var leadIndex = 0;
+var leadsLoaded = false;
+var bothPhase = 0; // alternates 0/1 in 'both' mode so the small mini card shows schedule, then leads, then schedule…
+
 async function loadWeekSlides() {
   var weekStart = startOfWeek(new Date());
   weekStart.setDate(weekStart.getDate() + weekOffset*7);
@@ -625,17 +701,22 @@ function jumpToToday() { weekOffset = 0; loadWeekSlides(); }
 loadWeekSlides();
 setInterval(function(){ if (weekOffset === 0) loadWeekSlides(); }, 5*60*1000); // refresh current week every 5 min
 
-function setSlideContainers(html) {
+// setSlideContainers(html) writes the same markup into both displays (schedule-only
+// or leads-only modes). setSlideContainers(miniHtml, tvHtml) writes different markup
+// into each — used by 'both' mode, where the small mini card alternates between
+// schedule/leads to stay uncluttered, while the roomier TV screen shows a real
+// side-by-side split of both at once.
+function setSlideContainers(miniHtml, tvHtml) {
   var mini = document.getElementById('miniSlideWrap');
   var tv = document.getElementById('tvSlideWrap');
-  if (mini) mini.innerHTML = html;
-  if (tv) tv.innerHTML = html;
+  if (mini) mini.innerHTML = miniHtml;
+  if (tv) tv.innerHTML = (tvHtml === undefined) ? miniHtml : tvHtml;
 }
 
 // ── View toggle: "Live" carousel vs. "Overview" 7-day grid ──
 function setSchedView(v) {
   schedView = v;
-  document.querySelectorAll('.sched-view-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.view === v); });
+  document.querySelectorAll('#schedViewToggle .sched-view-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.view === v); });
   document.getElementById('miniTvWrap').style.display = v === 'live' ? '' : 'none';
   document.getElementById('schedStrip').style.display = v === 'overview' ? '' : 'none';
   if (v === 'overview') renderOverview();
@@ -682,6 +763,77 @@ function renderOverview() {
     var el = document.getElementById('schedDay'+todayIdx);
     if (el) el.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
   }
+}
+
+// ══════════════════════════════════════════════════════════
+// LIVE LEADS — same Supabase project as the schedule (same URL, same anon
+// key), so we query its tables directly, exactly like the leads site itself
+// does client-side: active leads, needs-reply first then newest, each with
+// its Gemini-written overview and latest email — no extra backend needed.
+// ══════════════════════════════════════════════════════════
+async function fetchLeadSlides() {
+  if (!sbClient) throw new Error('Supabase client not available');
+  var r = await sbClient.from('leads').select('*').eq('archived', false).neq('status', 'cold').order('created_at', { ascending: false });
+  if (r.error) throw r.error;
+  var leadsData = r.data || [];
+  if (!leadsData.length) return [];
+
+  var ids = leadsData.map(function(l){ return l.id; });
+  var threadsByLead = {};
+  var tRes = await sbClient.from('email_threads').select('*').in('lead_id', ids).order('last_message_at', { ascending: false });
+  (tRes.data || []).forEach(function(t){ (threadsByLead[t.lead_id] = threadsByLead[t.lead_id] || []).push(t); });
+  var threadIds = (tRes.data || []).map(function(t){ return t.id; });
+  var messagesByThread = {};
+  if (threadIds.length) {
+    var mRes = await sbClient.from('email_messages').select('*').in('thread_id', threadIds).order('sent_at', { ascending: true });
+    (mRes.data || []).forEach(function(m){ (messagesByThread[m.thread_id] = messagesByThread[m.thread_id] || []).push(m); });
+  }
+
+  function replyCount(id){ return (threadsByLead[id]||[]).filter(function(t){ return t.needs_reply; }).length; }
+  leadsData.sort(function(a,b){
+    var ar = replyCount(a.id) > 0 ? 1 : 0, br = replyCount(b.id) > 0 ? 1 : 0;
+    if (ar !== br) return br - ar;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  return leadsData.map(function(l) {
+    var threads = threadsByLead[l.id] || [];
+    var latest = threads[0];
+    var latestMsg = latest ? (messagesByThread[latest.id] || []).slice(-1)[0] : null;
+    return {
+      name: l.customer_name || 'Unknown',
+      overview: l.ai_overview || '',
+      needsReply: !!(latest && latest.needs_reply),
+      hasEmail: !!latest,
+      latestMeta: latestMsg ? ((latestMsg.direction === 'inbound' ? 'Received from ' : 'Sent to ') + (latestMsg.direction === 'inbound' ? latestMsg.from_address : (latestMsg.to_addresses || [])[0] || '') + ' · ' + niceDate(latestMsg.sent_at)) : '',
+      latestBody: latestMsg ? (latestMsg.ai_summary || latestMsg.snippet || '') : '',
+      estimatesCount: (l.estimates || []).length
+    };
+  });
+}
+
+async function loadLeadSlides() {
+  try {
+    leadSlides = await fetchLeadSlides();
+  } catch (err) {
+    console.warn('[leads] fetch failed', err);
+    leadSlides = [];
+  }
+  leadsLoaded = true;
+  if (leadIndex >= leadSlides.length) leadIndex = 0;
+  if (contentMode === 'leads' || contentMode === 'both') {
+    renderProgressDots();
+    renderCurrentSlide();
+    if (tvPlaying) startTVAutoplay();
+  }
+}
+loadLeadSlides();
+setInterval(loadLeadSlides, 5*60*1000); // refresh leads every 5 min, same cadence as the schedule
+
+function leadEmptyHtml() {
+  return leadsLoaded
+    ? '<div class="tv-empty-day"><div class="tv-empty-day-icon">🎯</div><div class="tv-empty-day-text">No active leads right now.</div></div>'
+    : '<div class="tv-empty-day"><div class="tv-empty-day-icon">📡</div><div class="tv-empty-day-text">Loading leads…</div></div>';
 }
 
 function initials(name) {
@@ -739,27 +891,37 @@ function updateTVClock() {
   if (el) el.textContent = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
 }
 
-function dotsHtml(prefix) {
-  return tvSlides.map(function(_, i) {
-    return '<div class="tv-dot" id="'+prefix+'Dot'+i+'"><div class="tv-dot-fill"></div></div>';
-  }).join('');
+function dotsHtml(prefix, count) {
+  var out = '';
+  for (var i=0;i<count;i++) out += '<div class="tv-dot" id="'+prefix+'Dot'+i+'"><div class="tv-dot-fill"></div></div>';
+  return out;
 }
+// 'both' mode hides the per-slide dots — with two independent sequences plus
+// an alternating mini card, per-dot progress stops meaning anything useful
+// and just adds clutter, so we leave that row empty in that mode.
 function renderProgressDots() {
-  var mini = document.getElementById('miniProgress'); if (mini) mini.innerHTML = dotsHtml('mini');
-  var tv = document.getElementById('tvProgress'); if (tv) tv.innerHTML = dotsHtml('tv');
+  var mini = document.getElementById('miniProgress');
+  var tv = document.getElementById('tvProgress');
+  if (contentMode === 'both') { if (mini) mini.innerHTML = ''; if (tv) tv.innerHTML = ''; return; }
+  var count = contentMode === 'schedule' ? tvSlides.length : leadSlides.length;
+  if (mini) mini.innerHTML = dotsHtml('mini', count);
+  if (tv) tv.innerHTML = dotsHtml('tv', count);
 }
 function updateProgressState() {
+  if (contentMode === 'both') return;
+  var count = contentMode === 'schedule' ? tvSlides.length : leadSlides.length;
+  var idx = contentMode === 'schedule' ? tvIndex : leadIndex;
   ['mini','tv'].forEach(function(prefix) {
-    tvSlides.forEach(function(_, i) {
+    for (var i=0;i<count;i++) {
       var dot = document.getElementById(prefix+'Dot'+i);
-      if (!dot) return;
+      if (!dot) continue;
       dot.classList.remove('done','active');
       var fill = dot.querySelector('.tv-dot-fill');
       fill.style.transition = 'none';
-      if (i < tvIndex) { dot.classList.add('done'); fill.style.width = '100%'; }
-      else if (i === tvIndex) { dot.classList.add('active'); fill.style.width = '0%'; }
+      if (i < idx) { dot.classList.add('done'); fill.style.width = '100%'; }
+      else if (i === idx) { dot.classList.add('active'); fill.style.width = '0%'; }
       else { fill.style.width = '0%'; }
-    });
+    }
   });
 }
 
@@ -789,30 +951,101 @@ function slideContentHtml(s) {
   return html;
 }
 
+// Lead slide — same "big blocks" language as the schedule slide (tv-slide-hdr /
+// tv-slide-tech / etc.) so it feels like the same system, but the body is the
+// Gemini overview + latest email from the leads site's own "Review leads" mode,
+// reskinned to the hub's navy/green look instead of that site's warm palette.
+function leadSlideContentHtml(l) {
+  var badge = l.needsReply ? 'NEEDS A REPLY' : 'ACTIVE LEAD';
+  var html = '<div class="tv-slide-hdr"><div class="tv-slide-day">' + badge + '</div>';
+  html += '<div class="tv-slide-tech"><div class="tv-slide-tech-avatar">' + initials(l.name) + '</div>' + esc(l.name)
+    + (l.estimatesCount ? '<span class="tv-slide-count">' + l.estimatesCount + ' estimate' + (l.estimatesCount!==1?'s':'') + '</span>' : '')
+    + '</div></div>';
+  html += '<div class="tv-lead-body">';
+  html += '<div class="ld-slide-overview' + (l.overview ? '' : ' loading') + '">' + esc(l.overview || 'Preparing summary…') + '</div>';
+  html += '<div class="ld-slide-email' + (l.needsReply ? ' flag' : '') + '">';
+  if (l.hasEmail) {
+    html += '<div class="ld-slide-email-meta">' + esc(l.latestMeta) + (l.needsReply ? ' — not replied to yet' : '') + '</div>';
+    html += '<div class="ld-slide-email-body">' + esc(l.latestBody || '(no summary)') + '</div>';
+  } else {
+    html += '<div class="ld-slide-email-meta">No email history yet</div>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+// 'both' mode: TV Mode has room to show a real side-by-side split of the
+// current schedule slide and the current lead slide at once. The small mini
+// card does not — see setSlideContainers/renderCurrentSlide for how it
+// alternates between the two instead, so the page never feels cramped.
+function splitContentHtml() {
+  var schedHtml = tvSlides.length ? slideContentHtml(tvSlides[tvIndex]) : '<div class="tv-empty-day"><div class="tv-empty-day-icon">🗓️</div><div class="tv-empty-day-text">No jobs scheduled this week.</div></div>';
+  var leadHtml = leadSlides.length ? leadSlideContentHtml(leadSlides[leadIndex]) : leadEmptyHtml();
+  return '<div class="tv-split">'
+    + '<div class="tv-split-pane"><div class="tv-split-label">📅 Schedule</div>' + schedHtml + '</div>'
+    + '<div class="tv-split-pane"><div class="tv-split-label">🎯 Leads</div>' + leadHtml + '</div>'
+    + '</div>';
+}
+
 function renderCurrentSlide() {
   var topDay = document.getElementById('tvTopDay');
-  if (!tvSlides.length) {
-    setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">🗓️</div><div class="tv-empty-day-text">No jobs scheduled this week.</div></div>');
-    if (topDay) topDay.textContent = '—';
-    return;
+
+  if (contentMode === 'schedule') {
+    if (!tvSlides.length) {
+      setSlideContainers('<div class="tv-empty-day"><div class="tv-empty-day-icon">🗓️</div><div class="tv-empty-day-text">No jobs scheduled this week.</div></div>');
+      if (topDay) topDay.textContent = '—';
+    } else {
+      var s = tvSlides[tvIndex];
+      if (topDay) topDay.textContent = s.dayLabel + ' · ' + s.dateLabel;
+      setSlideContainers(slideContentHtml(s));
+    }
+  } else if (contentMode === 'leads') {
+    if (!leadSlides.length) {
+      setSlideContainers(leadEmptyHtml());
+      if (topDay) topDay.textContent = 'LEADS';
+    } else {
+      var l = leadSlides[leadIndex];
+      if (topDay) topDay.textContent = 'LEAD ' + (leadIndex+1) + ' / ' + leadSlides.length;
+      setSlideContainers(leadSlideContentHtml(l));
+    }
+  } else { // both
+    if (topDay) topDay.textContent = 'SCHEDULE + LEADS';
+    var miniHtml = bothPhase === 0
+      ? (tvSlides.length ? slideContentHtml(tvSlides[tvIndex]) : '<div class="tv-empty-day"><div class="tv-empty-day-icon">🗓️</div><div class="tv-empty-day-text">No jobs scheduled this week.</div></div>')
+      : (leadSlides.length ? leadSlideContentHtml(leadSlides[leadIndex]) : leadEmptyHtml());
+    setSlideContainers(miniHtml, splitContentHtml());
   }
-  var s = tvSlides[tvIndex];
-  if (topDay) topDay.textContent = s.dayLabel + ' · ' + s.dateLabel;
-  setSlideContainers(slideContentHtml(s));
+
   updateProgressState();
+  if (contentMode === 'both') return;
   requestAnimationFrame(function() {
+    var idx = contentMode === 'schedule' ? tvIndex : leadIndex;
     ['mini','tv'].forEach(function(prefix) {
-      var fill = document.querySelector('#'+prefix+'Dot'+tvIndex+' .tv-dot-fill');
+      var fill = document.querySelector('#'+prefix+'Dot'+idx+' .tv-dot-fill');
       if (fill && tvPlaying) { fill.style.transition = 'width ' + TV_SLIDE_MS + 'ms linear'; fill.style.width = '100%'; }
     });
   });
 }
 
-function slideNext() { tvIndex = (tvIndex + 1) % tvSlides.length; renderCurrentSlide(); if (tvPlaying) startTVAutoplay(); }
-function slidePrev() { tvIndex = (tvIndex - 1 + tvSlides.length) % tvSlides.length; renderCurrentSlide(); if (tvPlaying) startTVAutoplay(); }
+// Advances whichever index(es) matter for the current mode. In 'both' mode
+// both the schedule and lead pointers move every tick (that's what drives
+// the TV split view), and bothPhase flips too (that's what the mini card
+// uses to decide which of the two it's currently showing).
+function advanceIndices(dir) {
+  if ((contentMode === 'schedule' || contentMode === 'both') && tvSlides.length) {
+    tvIndex = (tvIndex + dir + tvSlides.length) % tvSlides.length;
+  }
+  if ((contentMode === 'leads' || contentMode === 'both') && leadSlides.length) {
+    leadIndex = (leadIndex + dir + leadSlides.length) % leadSlides.length;
+  }
+  if (contentMode === 'both') bothPhase = 1 - bothPhase;
+}
+
+function slideNext() { advanceIndices(1); renderCurrentSlide(); if (tvPlaying) startTVAutoplay(); }
+function slidePrev() { advanceIndices(-1); renderCurrentSlide(); if (tvPlaying) startTVAutoplay(); }
 function startTVAutoplay() {
   stopTVAutoplay();
-  tvAdvanceTimer = setInterval(function() { tvIndex = (tvIndex+1) % tvSlides.length; renderCurrentSlide(); }, TV_SLIDE_MS);
+  tvAdvanceTimer = setInterval(function() { advanceIndices(1); renderCurrentSlide(); }, TV_SLIDE_MS);
 }
 function stopTVAutoplay() { if (tvAdvanceTimer) { clearInterval(tvAdvanceTimer); tvAdvanceTimer = null; } }
 function slideTogglePlay() {
@@ -831,6 +1064,32 @@ document.addEventListener('keydown', function(e) {
   else if (e.key === 'ArrowRight' && !tvPlaying) slideNext();
   else if (e.key === 'ArrowLeft' && !tvPlaying) slidePrev();
 });
+
+// ── Content mode: what the carousel (mini + TV) shows ──
+function setContentMode(mode) {
+  contentMode = mode;
+  document.querySelectorAll('.content-mode-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.mode === mode); });
+  var viewToggle = document.getElementById('schedViewToggle');
+  var range = document.getElementById('schedRange');
+  var todayBtn = document.getElementById('schedTodayBtn');
+  var nav = document.getElementById('schedNav');
+  if (mode === 'schedule') {
+    if (viewToggle) viewToggle.style.display = '';
+    if (range) range.style.display = '';
+    if (todayBtn) todayBtn.style.display = '';
+    if (nav) nav.style.display = '';
+  } else {
+    if (viewToggle) viewToggle.style.display = 'none';
+    if (schedView !== 'live') setSchedView('live'); // the weekly grid only applies to schedule mode
+    var leadsOnly = mode === 'leads';
+    if (range) range.style.display = leadsOnly ? 'none' : '';
+    if (todayBtn) todayBtn.style.display = leadsOnly ? 'none' : '';
+    if (nav) nav.style.display = leadsOnly ? 'none' : '';
+  }
+  renderProgressDots();
+  renderCurrentSlide();
+  if (tvPlaying) startTVAutoplay();
+}
 
 function updateClock() {
   var now = new Date();
