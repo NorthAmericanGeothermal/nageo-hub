@@ -583,6 +583,16 @@ var SUPABASE_URL = "https://hpgwwegjsxyxovdattoc.supabase.co";
 var sbClient = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SCHEDULE_ANON_KEY) : null;
 
 function esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// HCP sometimes returns a job's notes as an array of note objects instead of
+// plain text — this flattens either shape into a display string so it never
+// renders as the literal "[object Object]".
+function notesText(n) {
+  if (!n) return '';
+  if (typeof n === 'string') return n;
+  if (Array.isArray(n)) return n.map(notesText).filter(Boolean).join(' • ');
+  if (typeof n === 'object') return n.content || n.text || n.note || n.body || '';
+  return String(n);
+}
 function niceDate(ts) {
   if (!ts) return '';
   return new Date(ts).toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
@@ -749,8 +759,8 @@ function renderOverview() {
         html += '<div class="sched-job-tech">👤 ' + (j.tech||'Unassigned') + '</div>';
         if (j.type || j.notes) {
           html += '<div class="sched-job-detail">';
-          if (j.type) html += '<strong>' + j.type + '</strong><br>';
-          if (j.notes) html += j.notes;
+          if (j.type) html += '<strong>' + esc(j.type) + '</strong><br>';
+          if (j.notes) html += esc(notesText(j.notes));
           html += '</div>';
         }
         html += '</div>';
@@ -801,8 +811,11 @@ async function fetchLeadSlides() {
     var latest = threads[0];
     var latestMsg = latest ? (messagesByThread[latest.id] || []).slice(-1)[0] : null;
     return {
+      id: l.id,
       name: l.customer_name || 'Unknown',
       overview: l.ai_overview || '',
+      overviewGeneratedAt: l.ai_overview_generated_at || null,
+      latestActivityAt: latest ? latest.last_message_at : null,
       needsReply: !!(latest && latest.needs_reply),
       hasEmail: !!latest,
       latestMeta: latestMsg ? ((latestMsg.direction === 'inbound' ? 'Received from ' : 'Sent to ') + (latestMsg.direction === 'inbound' ? latestMsg.from_address : (latestMsg.to_addresses || [])[0] || '') + ' · ' + niceDate(latestMsg.sent_at)) : '',
@@ -810,6 +823,42 @@ async function fetchLeadSlides() {
       estimatesCount: (l.estimates || []).length
     };
   });
+}
+
+// Same Edge Function the leads site's "Review leads" mode calls to have
+// Gemini write each lead's summary. The hub only *reads* ai_overview off the
+// leads table above — nothing writes it until something asks Gemini to. So,
+// just like the leads site does when you open its presentation mode, the hub
+// asks this function to (re)generate the overview for any lead missing one
+// or with newer email activity than its last summary, one at a time in the
+// background, and patches the result in without interrupting the carousel.
+var LEAD_HCP_SYNC_URL = SUPABASE_URL + "/functions/v1/lead-hcp-sync";
+async function refreshStaleLeadOverviews() {
+  var batch = leadSlides.slice();
+  for (var i = 0; i < batch.length; i++) {
+    var l = batch[i];
+    var stale = !l.overview || (l.latestActivityAt && (!l.overviewGeneratedAt || new Date(l.latestActivityAt) > new Date(l.overviewGeneratedAt)));
+    if (!stale) continue;
+    try {
+      var res = await fetch(LEAD_HCP_SYNC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SCHEDULE_ANON_KEY, 'apikey': SCHEDULE_ANON_KEY },
+        body: JSON.stringify({ action: 'generate_overview', lead_id: l.id })
+      });
+      var data = await res.json();
+      if (data && data.overview) {
+        l.overview = data.overview;
+        l.overviewGeneratedAt = new Date().toISOString();
+        // Only re-render if this lead is still the one on screen right now —
+        // leadSlides may have been replaced by a newer fetch by the time this lands.
+        if (leadSlides[leadIndex] === l && (contentMode === 'leads' || contentMode === 'both')) renderCurrentSlide();
+      } else {
+        console.warn('[leads] overview regen failed for', l.name, data && data.error);
+      }
+    } catch (e) {
+      console.warn('[leads] overview regen failed for', l.name, e);
+    }
+  }
 }
 
 async function loadLeadSlides() {
@@ -826,6 +875,7 @@ async function loadLeadSlides() {
     renderCurrentSlide();
     if (tvPlaying) startTVAutoplay();
   }
+  refreshStaleLeadOverviews(); // fire and forget — patches summaries in as Gemini returns them
 }
 loadLeadSlides();
 setInterval(loadLeadSlides, 5*60*1000); // refresh leads every 5 min, same cadence as the schedule
@@ -938,8 +988,8 @@ function slideContentHtml(s) {
     html += '<div class="tv-job-time">' + (j.time||'') + '</div>';
     html += '<div class="tv-job-cust">' + (j.customer||'') + '</div>';
     if (j.address) html += '<div class="tv-job-addr">📍 ' + j.address + '</div>';
-    html += '<div class="tv-job-meta">' + (j.jobId ? '<span class="tv-job-id">#'+j.jobId+'</span>' : '') + (j.type ? '<span class="tv-job-type">'+j.type+'</span>' : '') + '</div>';
-    if (j.notes) html += '<div class="tv-job-notes">' + j.notes + '</div>';
+    html += '<div class="tv-job-meta">' + (j.jobId ? '<span class="tv-job-id">#'+j.jobId+'</span>' : '') + (j.type ? '<span class="tv-job-type">'+esc(j.type)+'</span>' : '') + '</div>';
+    if (j.notes) html += '<div class="tv-job-notes">' + esc(notesText(j.notes)) + '</div>';
     html += '</div>';
   });
   html += '</div><div class="tv-map">';
