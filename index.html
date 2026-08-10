@@ -59,8 +59,8 @@ body::before{
 .hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:2.8rem;flex-wrap:wrap;
   animation:fadeUp .5s ease both;}
 .brand{display:flex;align-items:center;gap:13px;}
-.brand-badge{width:44px;height:44px;border-radius:12px;overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);flex-shrink:0;}
-.brand-badge img{width:100%;height:100%;object-fit:cover;display:block;}
+.brand-badge{height:44px;width:auto;flex-shrink:0;}
+.brand-badge img{height:100%;width:auto;object-fit:contain;display:block;}
 .brand-name{font-size:12.5px;font-weight:700;color:var(--text-dimmer);letter-spacing:1.2px;text-transform:uppercase;}
 .greeting{font-size:33px;font-weight:700;letter-spacing:-.6px;margin-top:3px;}
 .greeting span{background:linear-gradient(90deg,#fff,var(--green-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
@@ -252,8 +252,8 @@ body::before{
     linear-gradient(175deg,var(--navy) 0%,#081527 50%,var(--navy) 100%);
 }
 .tv-top{position:relative;z-index:2;display:flex;align-items:center;gap:16px;padding:22px 40px 10px;flex-shrink:0;}
-.tv-top-badge{width:42px;height:42px;border-radius:11px;overflow:hidden;flex-shrink:0;}
-.tv-top-badge img{width:100%;height:100%;object-fit:cover;display:block;}
+.tv-top-badge{height:42px;width:auto;flex-shrink:0;}
+.tv-top-badge img{height:100%;width:auto;object-fit:contain;display:block;}
 .tv-top-day{
   font-size:28px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
   color:var(--navy);background:var(--green-light);padding:7px 20px;border-radius:12px;
@@ -413,7 +413,7 @@ body::before{
   <div class="hdr">
     <div>
       <div class="brand">
-        <div class="brand-badge"><img src="icons/High%20Quality%20NAG%20Logo.png" alt="NAGeo"></div>
+        <div class="brand-badge"><img src="icons/nag-logo-transparent.png" alt="NAGeo"></div>
         <div class="brand-name">North American Geothermal</div>
       </div>
       <div class="greeting" id="greeting">Good day, <span>team</span>.</div>
@@ -481,7 +481,7 @@ body::before{
 <div class="tv" id="tv">
   <div class="tv-bg"></div>
   <div class="tv-top">
-    <div class="tv-top-badge"><img src="icons/High%20Quality%20NAG%20Logo.png" alt="NAGeo"></div>
+    <div class="tv-top-badge"><img src="icons/nag-logo-transparent.png" alt="NAGeo"></div>
     <div class="tv-top-day" id="tvTopDay">—</div>
     <div class="tv-top-title">NAGeo Routes</div>
     <div class="tv-top-clock" id="tvClock">--:--</div>
