@@ -785,7 +785,7 @@ function renderOverview() {
 // ══════════════════════════════════════════════════════════
 async function fetchLeadSlides() {
   if (!sbClient) throw new Error('Supabase client not available');
-  var r = await sbClient.from('leads').select('*').eq('archived', false).neq('status', 'cold').order('created_at', { ascending: false });
+  var r = await sbClient.from('leads').select('*').eq('archived', false).neq('status', 'cold').neq('status', 'won').order('created_at', { ascending: false });
   if (r.error) throw r.error;
   var leadsData = r.data || [];
   if (!leadsData.length) return [];
