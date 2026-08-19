@@ -433,7 +433,7 @@ body::before{
 
   <div class="sched">
     <div class="sched-hdr">
-      <div class="sched-title">This Week's Schedule</div>
+      <div class="sched-title" id="schedTitle">This Week's Schedule</div>
       <div class="sched-range" id="schedRange"></div>
       <div class="sched-view-toggle content-mode-toggle" id="contentModeToggle">
         <button class="sched-view-btn content-mode-btn active" data-mode="schedule" onclick="setContentMode('schedule')">📅 Schedule</button>
@@ -1118,9 +1118,12 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ── Content mode: what the carousel (mini + TV) shows ──
+var SCHED_TITLES = { schedule: "This Week's Schedule", leads: "Active Leads", both: "This Week's Schedule & Active Leads" };
 function setContentMode(mode) {
   contentMode = mode;
   document.querySelectorAll('.content-mode-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.mode === mode); });
+  var title = document.getElementById('schedTitle');
+  if (title) title.textContent = SCHED_TITLES[mode] || "This Week";
   var viewToggle = document.getElementById('schedViewToggle');
   var range = document.getElementById('schedRange');
   var todayBtn = document.getElementById('schedTodayBtn');
