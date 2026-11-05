@@ -403,11 +403,68 @@ body::before{
   .clock{text-align:left;}
   .viewer-title{display:none;}
 }
+
+/* ── Access code lock screen + admin modal ── */
+.hub-lock{position:fixed;inset:0;z-index:9999;background:#0b1626;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.hub-lock.hidden{display:none;}
+.hub-lock-box{width:100%;max-width:340px;text-align:center;display:flex;flex-direction:column;gap:12px;}
+.hub-lock-logo{height:56px;margin:0 auto 4px;object-fit:contain;}
+.hub-lock-title{font-size:22px;font-weight:700;color:var(--text);}
+.hub-lock-sub{font-size:13px;color:var(--text-dim);margin-bottom:6px;}
+.hub-lock input{padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:var(--text);font-size:15px;font-family:inherit;text-align:center;outline:none;}
+.hub-lock input:focus{border-color:#4a95f0;}
+.hub-lock button{padding:12px;border-radius:12px;border:none;background:#2a7de1;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}
+.hub-lock button:disabled{opacity:.6;cursor:default;}
+.hub-lock-err{min-height:18px;font-size:12.5px;color:#ff8a8a;}
+.hub-modal{position:fixed;inset:0;z-index:9000;background:rgba(5,10,20,.78);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
+.hub-modal.open{display:flex;}
+.hub-modal-box{width:100%;max-width:640px;background:#0f1e33;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px;color:var(--text);}
+.hub-modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.hub-modal-title{font-size:18px;font-weight:700;}
+.hub-modal-x{background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;}
+.hub-modal-note{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin-bottom:14px;}
+.ha-row{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin-bottom:12px;}
+.ha-top{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.ha-top input{flex:1;min-width:140px;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:var(--text);font-size:13.5px;font-family:inherit;}
+.ha-chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-dim);margin:4px 0;}
+.ha-apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:2px 10px;margin:6px 0 10px;}
+.ha-apps.dim{opacity:.4;pointer-events:none;}
+.ha-actions{display:flex;align-items:center;gap:8px;}
+.ha-btn{padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:var(--text);font-size:13px;cursor:pointer;font-family:inherit;}
+.ha-btn.primary{background:#2a7de1;border-color:#2a7de1;color:#fff;}
+.ha-btn.danger{color:#ff9a9a;}
+.ha-msg{font-size:12px;color:var(--text-dim);}
+.ha-msg.err{color:#ff8a8a;}
 </style>
 </head>
 <body>
 <div class="orb orb1"></div>
 <div class="orb orb2"></div>
+
+<!-- ACCESS CODE LOCK SCREEN — shown until a valid code is entered (once per device) -->
+<div class="hub-lock" id="hubLock">
+  <div class="hub-lock-box">
+    <img src="icons/High%20Quality%20NAG%20Logo%20(Trans).png" alt="NAGeo" class="hub-lock-logo">
+    <div class="hub-lock-title">NAGeo Hub</div>
+    <div class="hub-lock-sub" id="hubLockSub">Enter your access code to continue</div>
+    <input type="password" id="hubLockInput" placeholder="Access code" autocomplete="off" onkeydown="if(event.key==='Enter')hubSubmitCode()">
+    <button id="hubLockBtn" onclick="hubSubmitCode()">Unlock</button>
+    <div class="hub-lock-err" id="hubLockErr"></div>
+  </div>
+</div>
+
+<!-- ADMIN: manage access codes -->
+<div class="hub-modal" id="hubAdmin">
+  <div class="hub-modal-box">
+    <div class="hub-modal-hdr">
+      <div class="hub-modal-title">Access Codes</div>
+      <button class="hub-modal-x" onclick="closeHubAdmin()">&#10005;</button>
+    </div>
+    <div class="hub-modal-note">Each code only shows the apps ticked for it. Anyone not ticked simply won't see that app on the hub. Changes apply the next time that person opens the hub.</div>
+    <div id="hubAdminList"></div>
+    <button class="ha-btn primary" onclick="adminAddRow()">+ Add access code</button>
+  </div>
+</div>
 
 <div class="wrap">
   <div class="hdr">
@@ -465,7 +522,7 @@ body::before{
     <div class="sched-strip" id="schedStrip" style="display:none"><div class="sched-state">Loading schedule…</div></div>
   </div>
 
-  <div class="footer">NAGeo Hub &middot; six tools, one front door &middot; <a href="#" id="editLinksNote">edit URLs in index.html</a></div>
+  <div class="footer">NAGeo Hub &middot; one front door &middot; <a href="#" id="hubAdminLink" style="display:none" onclick="openHubAdmin();return false">&#9881; Admin</a><span id="hubAdminSep" style="display:none"> &middot; </span><a href="#" onclick="hubSignOut();return false">Sign out</a></div>
 </div>
 
 <div class="viewer" id="viewer">
@@ -535,9 +592,9 @@ function cardGlow(e) {
 }
 document.getElementById('filterInput').addEventListener('input', function() {
   var q = this.value.toLowerCase();
-  renderGrid(TOOLS.filter(function(t){ return (t.name+' '+t.desc+' '+t.tag).toLowerCase().includes(q); }));
+  renderGrid(visibleTools().filter(function(t){ return (t.name+' '+t.desc+' '+t.tag).toLowerCase().includes(q); }));
 });
-renderGrid(TOOLS);
+renderGrid([]); // nothing shown until a valid access code is entered (see ACCESS CODES below)
 
 // ── In-hub viewer: opens the tool in an embedded iframe with its own back button ──
 function openTool(e, idx) {
@@ -584,6 +641,130 @@ var DEMO_SCHEDULE = false;  // set back to true any time to preview with sample 
 // the leads site itself does, no extra backend needed.
 var SUPABASE_URL = "https://hpgwwegjsxyxovdattoc.supabase.co";
 var sbClient = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SCHEDULE_ANON_KEY) : null;
+
+// ══════════════════════════════════════════════════════════
+// ACCESS CODES — each code only unlocks the apps ticked for it. Codes live
+// in Supabase (table hub_access_codes, readable only through the hub_*
+// functions in setup-hub-access.sql, never directly from the browser). A
+// device enters its code once; it's remembered here and re-checked on every
+// load, so changing/deleting a code in Admin takes effect right away.
+// This hides apps from the hub — it doesn't lock the apps' own web addresses.
+// ══════════════════════════════════════════════════════════
+var HUB_CODE_KEY = 'nageo_hub_code';
+var SCHEDULE_KEY = '__schedule'; // pseudo-app: the Schedule & Leads panel on the hub
+var hubSession = null;           // { id, label, apps, is_admin, code } once unlocked
+
+function visibleTools() {
+  if (!hubSession) return [];
+  if (hubSession.is_admin) return TOOLS;
+  return TOOLS.filter(function(t){ return hubSession.apps.indexOf(t.url) > -1; });
+}
+function hubCanSee(key) { return !!hubSession && (hubSession.is_admin || hubSession.apps.indexOf(key) > -1); }
+
+async function hubLogin(code) {
+  if (!sbClient) throw new Error('Could not connect. Check your internet and refresh.');
+  var r = await sbClient.rpc('hub_login', { p_code: code });
+  if (r.error) throw new Error(r.error.message || 'Could not check the code.');
+  return r.data; // null if the code isn't valid
+}
+function hubApplySession(s, code) {
+  hubSession = { id: s.id, label: s.label, apps: s.apps || [], is_admin: !!s.is_admin, code: code };
+  document.getElementById('hubLock').classList.add('hidden');
+  document.getElementById('filterInput').value = '';
+  renderGrid(visibleTools());
+  var sched = document.querySelector('.sched');
+  if (sched) sched.style.display = hubCanSee(SCHEDULE_KEY) ? '' : 'none';
+  document.getElementById('hubAdminLink').style.display = hubSession.is_admin ? '' : 'none';
+  document.getElementById('hubAdminSep').style.display = hubSession.is_admin ? '' : 'none';
+}
+async function hubSubmitCode() {
+  var input = document.getElementById('hubLockInput'), err = document.getElementById('hubLockErr'), btn = document.getElementById('hubLockBtn');
+  var code = input.value.trim();
+  if (!code) return;
+  btn.disabled = true; err.textContent = '';
+  try {
+    var s = await hubLogin(code);
+    if (!s) { err.textContent = "That code isn't right. Try again."; }
+    else { try { localStorage.setItem(HUB_CODE_KEY, code); } catch (e) {} hubApplySession(s, code); input.value = ''; }
+  } catch (e) { err.textContent = e.message; }
+  btn.disabled = false;
+}
+function hubSignOut() {
+  try { localStorage.removeItem(HUB_CODE_KEY); } catch (e) {}
+  location.reload();
+}
+(async function hubBoot() {
+  var saved = ''; try { saved = localStorage.getItem(HUB_CODE_KEY) || ''; } catch (e) {}
+  if (!saved) return; // lock screen stays up
+  try {
+    var s = await hubLogin(saved);
+    if (s) hubApplySession(s, saved);
+    else { try { localStorage.removeItem(HUB_CODE_KEY); } catch (e) {} document.getElementById('hubLockErr').textContent = 'Your access code was changed. Please enter the new one.'; }
+  } catch (e) { document.getElementById('hubLockErr').textContent = e.message; }
+})();
+
+// ── Admin panel ──
+var adminRows = [];
+function openHubAdmin() { document.getElementById('hubAdmin').classList.add('open'); adminLoad(); }
+function closeHubAdmin() { document.getElementById('hubAdmin').classList.remove('open'); }
+async function adminLoad() {
+  var list = document.getElementById('hubAdminList');
+  list.innerHTML = '<div class="hub-modal-note">Loading…</div>';
+  var r = await sbClient.rpc('hub_admin_list', { p_admin_code: hubSession.code });
+  if (r.error) { list.innerHTML = '<div class="hub-modal-note" style="color:#ff8a8a">' + esc(r.error.message) + '</div>'; return; }
+  adminRows = r.data || [];
+  adminRender();
+}
+function adminAddRow() {
+  adminRows.push({ id: null, label: '', code: '', apps: [], is_admin: false });
+  adminRender();
+}
+function adminRender() {
+  document.getElementById('hubAdminList').innerHTML = adminRows.map(function(row, i) {
+    var apps = TOOLS.map(function(t){ return { key: t.url, name: t.name }; }).concat([{ key: SCHEDULE_KEY, name: 'Schedule & Leads panel' }]);
+    var checks = apps.map(function(a) {
+      return '<label class="ha-chk"><input type="checkbox" class="ha-app" data-key="' + esc(a.key) + '"' + (row.is_admin || row.apps.indexOf(a.key) > -1 ? ' checked' : '') + '> ' + esc(a.name) + '</label>';
+    }).join('');
+    return '<div class="ha-row" data-i="' + i + '">'
+      + '<div class="ha-top"><input class="ha-label" placeholder="Name (e.g. Sales team)" value="' + esc(row.label) + '"><input class="ha-code" placeholder="Access code" value="' + esc(row.code) + '"></div>'
+      + '<label class="ha-chk"><input type="checkbox" class="ha-admin" onchange="adminToggleAdmin(' + i + ')"' + (row.is_admin ? ' checked' : '') + '> Admin (sees everything and can edit these codes)</label>'
+      + '<div class="ha-apps' + (row.is_admin ? ' dim' : '') + '">' + checks + '</div>'
+      + '<div class="ha-actions"><button class="ha-btn primary" onclick="adminSave(' + i + ')">Save</button><button class="ha-btn danger" onclick="adminDelete(' + i + ')">Delete</button><span class="ha-msg"></span></div>'
+      + '</div>';
+  }).join('');
+}
+function adminToggleAdmin(i) {
+  var el = document.querySelector('.ha-row[data-i="' + i + '"]');
+  el.querySelector('.ha-apps').classList.toggle('dim', el.querySelector('.ha-admin').checked);
+}
+function adminMsg(el, text, isErr) { var m = el.querySelector('.ha-msg'); m.textContent = text; m.className = 'ha-msg' + (isErr ? ' err' : ''); }
+async function adminSave(i) {
+  var el = document.querySelector('.ha-row[data-i="' + i + '"]'), row = adminRows[i];
+  var label = el.querySelector('.ha-label').value.trim();
+  var code = el.querySelector('.ha-code').value.trim();
+  var isAdmin = el.querySelector('.ha-admin').checked;
+  var apps = Array.prototype.map.call(el.querySelectorAll('.ha-app:checked'), function(c){ return c.getAttribute('data-key'); });
+  if (!label) return adminMsg(el, 'Give it a name.', true);
+  if (code.length < 4) return adminMsg(el, 'Code must be at least 4 characters.', true);
+  if (!isAdmin && !apps.length) return adminMsg(el, 'Tick at least one app.', true);
+  adminMsg(el, 'Saving…');
+  var r = await sbClient.rpc('hub_admin_save', { p_admin_code: hubSession.code, p_id: row.id, p_label: label, p_code: code, p_apps: apps, p_is_admin: isAdmin });
+  if (r.error) return adminMsg(el, r.error.message, true);
+  if (row.id && row.id === hubSession.id) { // editing the code you're signed in with — keep this device signed in
+    try { localStorage.setItem(HUB_CODE_KEY, code); } catch (e) {}
+    hubApplySession({ id: hubSession.id, label: label, apps: apps, is_admin: isAdmin }, code);
+  }
+  await adminLoad();
+}
+async function adminDelete(i) {
+  var el = document.querySelector('.ha-row[data-i="' + i + '"]'), row = adminRows[i];
+  if (!row.id) { adminRows.splice(i, 1); adminRender(); return; }
+  if (row.id === hubSession.id) return adminMsg(el, "You can't delete the code you're signed in with.", true);
+  if (!confirm('Delete the code "' + row.label + '"? Anyone using it will be locked out.')) return;
+  var r = await sbClient.rpc('hub_admin_delete', { p_admin_code: hubSession.code, p_id: row.id });
+  if (r.error) return adminMsg(el, r.error.message, true);
+  await adminLoad();
+}
 
 function esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 // HCP sometimes returns a job's notes as an array of note objects instead of
